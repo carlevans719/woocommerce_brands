@@ -32,13 +32,23 @@ function activate_woocommerce_brands() {
 
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/woocommerce_brands-activator.php
+ * This action is documented in includes/woocommerce_brands-deactivator.php
  */
 function deactivate_woocommerce_brands() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce_brands-activator.php';
+	require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce_brands-deactivator.php';
 	Woocommerce_Brands_Deactivator::deactivate();
 }
 
+/**
+ * The code that creates the custom post type
+ * This action is documented in includes/woocommerce_brands-activator.php
+ */
+function create_custom_post_type() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce_brands-activator.php';
+	Woocommerce_Brands_Activator::setup_post_type();
+}
+
+add_action( 'init', 'create_custom_post_type');
 register_activation_hook( __FILE__, 'activate_woocommerce_brands' );
 register_deactivation_hook( __FILE__, 'deactivate_woocommerce_brands' );
 
