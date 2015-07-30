@@ -19,6 +19,7 @@ Enables the ability to add "Brands" and assign them to products in Woocommerce. 
 
 1. Upload `wc_brands.zip` to the `/wp-content/plugins/` directory
 1. Unzip the archive
+1. Rename "woocommerce_brands-master" to "woocommerce_brands"
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Frequently Asked Questions ==
