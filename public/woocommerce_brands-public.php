@@ -100,4 +100,5 @@ class Woocommerce_Brands_Public {
 
 	}
 
+
 }

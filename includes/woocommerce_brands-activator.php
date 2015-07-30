@@ -30,9 +30,21 @@ class Woocommerce_Brands_Activator {
 	 * @since    0.1.0
 	 */
 	public static function activate() {
+		// add cpt
 		if (!self::setup_post_type()) {
 			die("Unable to create custom post type");
 		};
+
+		// add version
+		if (!defined('WCB_VERSION_KEY'))
+	    define('WCB_VERSION_KEY', 'wcb_version');
+
+		if (!defined('WCB_VERSION_NUMBER'))
+	    define('WCB_VERSION_NUMBER', '0.1.0');
+
+		add_option(WCB_VERSION_KEY, WCB_VERSION_NUMBER);
+
+		// flush
     flush_rewrite_rules();
 	}
 
@@ -75,4 +87,5 @@ class Woocommerce_Brands_Activator {
 	  register_post_type('wcb_brand', $args);
 		return true;
 	}
+
 }

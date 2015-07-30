@@ -1,4 +1,15 @@
 <?php
+$wcb_latest_version = '0.1.0';
+
+if (!defined('WCB_PLUGIN_NAME'))
+define('WCB_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
+
+if (!defined('WCB_PLUGIN_DIR'))
+define('WCB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . WCB_PLUGIN_NAME);
+
+if (!defined('WCB_PLUGIN_URL'))
+define('WCB_PLUGIN_URL', WP_PLUGIN_URL . '/' . WCB_PLUGIN_NAME);
+
 /**
  * @link              TBC
  * @since             0.1.0
@@ -17,8 +28,17 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
+if ( ! defined( 'WPINC' ) )
+die;
+
+// upgrade info
+if (get_option(WCB_VERSION_KEY) != $wcb_latest_version) {
+	$res = wcb_upgrade();
+	if ($res['status'] == "success") {
+  	update_option(WCB_VERSION_KEY, $wcb_latest_version);
+	} else {
+		logit($res);
+	}
 }
 
 /**
@@ -41,14 +61,20 @@ function deactivate_woocommerce_brands() {
 
 /**
  * The code that creates the custom post type
- * This action is documented in includes/woocommerce_brands-activator.php
  */
 function wcb_create_custom_post_type() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/woocommerce_brands-activator.php';
 	Woocommerce_Brands_Activator::setup_post_type();
 }
 
-add_action( 'init', 'wcb_create_custom_post_type');
+/**
+ * The code that sets up the post activation actions
+ */
+function post_init_actions() {
+	wcb_create_custom_post_type();
+}
+add_action( 'init', 'post_init_actions');
+
 register_activation_hook( __FILE__, 'activate_woocommerce_brands' );
 register_deactivation_hook( __FILE__, 'deactivate_woocommerce_brands' );
 
@@ -93,13 +119,6 @@ function wcb_save_custom_fields( $post_id ) {
 add_action( 'woocommerce_process_product_meta', 'wcb_save_custom_fields' );
 
 
-
-
-
-
-
-
-
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
@@ -122,3 +141,17 @@ function run_woocommerce_brands() {
 
 }
 run_woocommerce_brands();
+
+function wcb_upgrade() {
+	return array("status" => 'success');
+}
+
+function logit($message) {
+    if (WP_DEBUG === true) {
+        if (is_array($message) || is_object($message)) {
+            error_log(print_r($message, true));
+        } else {
+            error_log($message);
+        }
+    }
+}

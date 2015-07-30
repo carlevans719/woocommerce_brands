@@ -68,7 +68,7 @@ class Woocommerce_Brands {
 	 */
 	public function __construct() {
 
-		$this->Woocommerce_Brands = 'plugin-name';
+		$this->Woocommerce_Brands = 'woocommerce-brands';
 		$this->version = '0.1.0';
 
 		$this->load_dependencies();
@@ -118,6 +118,11 @@ class Woocommerce_Brands {
 		 * side of the site.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/woocommerce_brands-public.php';
+
+		/**
+		 * The class responsible for defining all actions that occur in the filter widget
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/widget/woocommerce_brands-filterWidget.php';
 
 		$this->loader = new Woocommerce_Brands_Loader();
 
