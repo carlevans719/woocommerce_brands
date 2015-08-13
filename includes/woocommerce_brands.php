@@ -122,7 +122,7 @@ class Woocommerce_Brands {
 		/**
 		 * The class responsible for defining all actions that occur in the filter widget
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/widget/woocommerce_brands-filterWidget.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'widget/woocommerce_brands-filterWidget.php';
 
 		$this->loader = new Woocommerce_Brands_Loader();
 

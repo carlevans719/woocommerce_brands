@@ -1,28 +1,24 @@
 span.ui-slider-handle.ui-state-default.ui-corner-all {
     background-color: #007df1;
     border-radius: 100%;
-    margin-top: 6px;
+    margin-top: 1px;
 }
 
 span.ui-slider-handle.ui-state-default.ui-corner-all:after {
     content: attr(data-content);
-    margin-top: 15px;
     position: absolute;
+    top: 12px;
 }
 
 .ui-slider-range.ui-widget-header.ui-corner-all {
     background-color: rgba(81,81,81,.7);
-    height: .8em;
-    margin-top: 6px;
+    margin-top: 1px;
 }
 
 div#slider-range {
     background-color: rgba(99,99,99,.3);
-    padding-top: 5px;
-    padding-bottom: 5px;
-    border-radius: 100%;
-    margin-bottom: 20px;
     display: block;
+    margin-bottom: 20px;
 }
 
 
@@ -194,7 +190,6 @@ PINCHED
     display: block;
     width: 10px;
     height: 10px;
-    border: 1px solid #2aadde;
     -webkit-border-radius: 5px;
     border-radius: 5px;
     content: '';
@@ -206,6 +201,32 @@ PINCHED
     display: block;
     border: 0;
     background: #2aadde;
+}
+div#slider-range:before {
+    content: attr(data-min);
+    position: absolute;
+    top: -20px;
+    background-color: #cccccc;      
+    border-radius: 20%;      
+    padding: 5px 2px;      
+    padding-top: 0;
+}
+
+div#slider-range:after {
+    content: attr(data-max);
+    position: absolute;
+    right: 0;
+    top: -20px;
+    background-color: #cccccc;
+    border-radius: 20%;
+    padding: 5px 2px;      
+    padding-top: 0;
+
+}
+
+div#slider-range {
+    margin-top: 25px;
+    margin-bottom: 25px;
 }
 
 /* For IE8 - See #6727 */

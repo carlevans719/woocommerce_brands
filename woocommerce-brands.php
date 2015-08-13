@@ -1,15 +1,4 @@
 <?php
-$wcb_latest_version = '0.1.0';
-
-if (!defined('WCB_PLUGIN_NAME'))
-define('WCB_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
-
-if (!defined('WCB_PLUGIN_DIR'))
-define('WCB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . WCB_PLUGIN_NAME);
-
-if (!defined('WCB_PLUGIN_URL'))
-define('WCB_PLUGIN_URL', WP_PLUGIN_URL . '/' . WCB_PLUGIN_NAME);
-
 /**
  * @link              TBC
  * @since             0.1.0
@@ -26,6 +15,17 @@ define('WCB_PLUGIN_URL', WP_PLUGIN_URL . '/' . WCB_PLUGIN_NAME);
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       TBC
  */
+
+$wcb_latest_version = '0.1.0';
+
+if (!defined('WCB_PLUGIN_NAME'))
+define('WCB_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
+
+if (!defined('WCB_PLUGIN_DIR'))
+define('WCB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . WCB_PLUGIN_NAME);
+
+if (!defined('WCB_PLUGIN_URL'))
+define('WCB_PLUGIN_URL', WP_PLUGIN_URL . '/' . WCB_PLUGIN_NAME);
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
