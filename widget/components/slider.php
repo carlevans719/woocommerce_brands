@@ -2,12 +2,12 @@
 global $wcbFilter;
 $price = $wcbFilter->get_params()['price'];
 $absPrice = $wcbFilter->get_params()['absPrice'];
-$min_price = $price[0];
-$max_price = $price[1];
 $absMin_price = $absPrice[0];
 $absMax_price = $absPrice[1];
-$componentMarkup = '<script>
-    $ = jQuery;
+$min_price = $price[0];
+$max_price = $price[1] ? $price[1] : $absMax_price;
+$componentMarkup = '<div class="sliderWrapper"><script>
+(function( $ ) {
     $(function() {
         $( "#slider-range" ).slider({
             range: true,
@@ -26,9 +26,10 @@ $componentMarkup = '<script>
         $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
         $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
     });
+})( jQuery );
 </script>
 
 <input name="price_min" type="hidden" id="wcb_price_min">
 <input name="price_max" type="hidden" id="wcb_price_max">
-<div id="slider-range" data-min="£'.$absMin_price.'" data-max="£'.$absMax_price.'"></div>
+<div id="slider-range" data-min="£'.$absMin_price.'" data-max="£'.$absMax_price.'"></div></div>
 ';

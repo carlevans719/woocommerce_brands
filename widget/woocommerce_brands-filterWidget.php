@@ -1,5 +1,7 @@
 <?php
 define("COMPONENTS_DIR", plugin_dir_path(__FILE__) . "components/");
+define('PLUGIN_URI', plugins_url() . '/');
+
 global $wcbFilter;
 
 class wcb_FilterWidget extends WP_Widget
@@ -24,20 +26,31 @@ class wcb_FilterWidget extends WP_Widget
 	        ) // Args
         );
         
-        define('PLUGIN_URI', plugins_url() . '/');
-        add_filter('posts_orderby', 'wcb_reOrder');
-        add_filter('post_limits', 'wcb_adjustLimit');
-
+// todo clean up this clusterfuck
         $loop      = new WP_Query($this->instance_params);
         $min_price = $this->instance_params['price'][0] ? $this->instance_params['price'][0] : 999999;
         $max_price = $this->instance_params['price'][1] ? $this->instance_params['price'][1] : 0;
+        
+        $availableBrands = array();
+
         while ($loop->have_posts()):
             $loop->the_post();
             global $product;
+
+            $brandId = get_post_meta(get_the_ID(), 'wcb_brand')[0];
+            if ( ($brandId) && (!array_search($brandId, $availableBrands)) ) {
+            	if ($availableBrands[$brandId]) {
+            		$availableBrands[$brandId]++;
+            	} else  {
+            		$availableBrands[$brandId] = 1;
+            	}
+			}
             if (get_post_meta(get_the_ID(), '_price')[0] > $max_price) $max_price = get_post_meta(get_the_ID(), '_price')[0];
 		    if ( (0 < get_post_meta(get_the_ID(), '_price')[0]) && (get_post_meta(get_the_ID(), '_price')[0] < $min_price) ) $min_price = get_post_meta(get_the_ID(), '_price')[0];
         endwhile;
         
+        $this->instance_params['availableBrands'] = $availableBrands;
+
 		$this->instance_params['active_filters'] = $activeFilters = array_keys(wcb_sort_queries($_GET));
         foreach (wcb_sort_queries($_GET) as $key => $value) {
         	$this->instance_params[$key] = $value;
@@ -56,8 +69,18 @@ class wcb_FilterWidget extends WP_Widget
 
         wp_reset_query();
 
+        // force brand ids to ints
+        if ($this->instance_params['brand']) {
+        	for ($i=0; $i < count($this->instance_params['brand']); $i++) { 
+        		$this->instance_params['brand'][$i] = intval($this->instance_params['brand'][$i]);
+        	}
+		}
+
+
+        add_filter('posts_orderby', 'wcb_reOrder');
+        add_filter('post_limits', 'wcb_adjustLimit');
 	        
-        // logit($this->instance_params);
+        logit($this->instance_params);
         return $this;
     }
     
@@ -66,7 +89,7 @@ class wcb_FilterWidget extends WP_Widget
     {
         return $this->instance_params;
     }
-    
+
 
     /**
      * Outputs the content of the widget
@@ -76,17 +99,19 @@ class wcb_FilterWidget extends WP_Widget
      */
     public function widget($args, $instance)
     {
+    	// todo only show widget on the shop pages
+
         echo $args['before_widget'];
         if (!empty($instance['title'])) {
             echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
         } //!empty($instance['title'])
         
+        $params = array();
         // Price slider
-        if ($instance['filterBy-price'] == true) {
-            echo self::get_widget_html(array(
-                0 => 'priceSlider'
-            ));
-        } //$instance['filterBy-price'] == true
+        if ($instance['filterBy-price']) $params[] = 'priceSlider';
+        // Brands
+        if ($instance['filterBy-brand']) $params[] = $instance['filterBy-brand-layout'] == 'tiles' ? 'brandsTiles' : 'brandsChecklist';
+        echo self::get_widget_html($params);
         
         echo $args['after_widget'];
     }
@@ -101,9 +126,36 @@ class wcb_FilterWidget extends WP_Widget
     {
         $title         = (!empty($instance['title']) ? $instance['title'] : 'Product filter');
         $filterByPrice = (!empty($instance['filterBy-price']) ? $instance['filterBy-price'] : false);
-        $filterBy      = array(
-            'price' => $filterByPrice
+        $filterByBrand = (!empty($instance['filterBy-brand']) ? $instance['filterBy-brand'] : false);
+
+        /* todo: change to an array.
+        so 
+        $instance['filterBy-brand-layout'] = array(
+	        'checkboxes' => false,
+	        'tiles' => true
         );
+        then
+        $filterByBrandLayout = array_search('true', $instance['filterBy-brand-layout']) || 'tiles';
+        */
+    	if (!empty($instance['filterBy-brand-layout'])) {
+			$filterByBrandLayout = $instance['filterBy-brand-layout'];
+		} else {
+			$filterByBrandLayout = 'tiles';
+		}
+
+
+		// Feed values generated above in to one of these arrays
+        $filterBy = array(
+            'price' => $filterByPrice,
+            'brand' => $filterByBrand
+        );
+        $options = array(
+        	'brandLayout' => $filterByBrandLayout
+        );
+
+        wp_register_script('wcb_widget-admin-widgets-js', PLUGIN_URI . 'woocommerce-brands/admin/js/wcb_widget-admin-widgets.js');
+        wp_enqueue_script('wcb_widget-admin-widgets-js');
+
 		?>
 	    <p>
 	      <label for="<?php echo $this->get_field_id('title'); ?>">
@@ -113,11 +165,39 @@ class wcb_FilterWidget extends WP_Widget
 	    </p>
 	    <p>
 	      <h4>Filter products by:</h4>
+
+	      <?php /* PRICE FILTER */ ?>
 	      <fieldset>
 	        <label for="<?php echo $this->get_field_id('filterBy-price'); ?>">
 		        <?php echo 'Price:'; ?>
 	        </label>
 	        <input class="widefat" id="<?php echo $this->get_field_id('filterBy-price'); ?>" name="<?php echo $this->get_field_name('filterBy-price'); ?>" type="checkbox" <?php if (esc_attr($filterBy['price']) == true) echo "checked"; ?>>
+	      </fieldset>
+
+
+
+	      <?php /* BRAND FILTER */ ?>
+	      <fieldset>
+		      <label for="<?php echo $this->get_field_id('filterBy-brand'); ?>">
+				<?php echo 'Brand:'; ?>
+		      </label>
+		      <input class="widefat brandCheck" id="<?php echo $this->get_field_id('filterBy-brand'); ?>" name="<?php echo $this->get_field_name('filterBy-brand'); ?>" type="checkbox"<?php if (esc_attr($filterBy['brand'])) echo " checked"; ?>>
+
+		      <div class="brandOptions-container"<?php if (!esc_attr($filterBy['brand'])) echo ' style="display:none;"' ?>>			
+		      	<?php if ($options['brandLayout'] == 'checkboxes') {
+		      		$tilesChecked = '';
+		      		$checksChecked = 'checked="checked"';
+		      		$layoutValue = 'checkboxes';
+		      	} else {
+		      		$tilesChecked = 'checked="checked"';
+		      		$checksChecked = '';
+		      		$layoutValue = 'tiles';
+		      	}; ?>
+
+		      		<input class="widefat brandLayout" type="radio" name="filterBy-brand-layout" id="filterBy-brand-layout--tiles" value="tiles" <?php echo $tilesChecked; ?>><span>Thumbnail tiles</span>
+					<input class="widefat brandLayout" type="radio" name="filterBy-brand-layout" id="filterBy-brand-layout--checkboxes" value="checkboxes" <?php echo $checksChecked; ?>><span>List of checkboxes</span>
+			      	<input class="brandLayoutVal" type="hidden" name="<?php echo $this->get_field_name('filterBy-brand-layout'); ?>" id="<?php echo $this->get_field_id('filterBy-brand-layout'); ?>" data-value="<?php echo $layoutValue; ?>">
+			  </div>
 	      </fieldset>
 	    </p>
 	    <?php
@@ -139,28 +219,49 @@ class wcb_FilterWidget extends WP_Widget
         $instance                   = array();
         $instance['title']          = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
         $instance['filterBy-price'] = (!empty($new_instance['filterBy-price'])) ? (bool) strip_tags($new_instance['filterBy-price']) : false;
+        $instance['filterBy-brand'] = (!empty($new_instance['filterBy-brand'])) ? (bool) strip_tags($new_instance['filterBy-brand']) : false;
+        $instance['filterBy-brand-layout'] = (!empty($new_instance['filterBy-brand-layout'])) ? strip_tags($new_instance['filterBy-brand-layout']) : false;
         return $instance;
     }
     
     
     private static function get_widget_html($args)
     {
+    	/*
+    	wcb_get_attributes();
+		returns
+		Array
+		(
+		    [pa_color] => 
+		    [pa_speed] => Speed
+		)
+    	*/
         $output       = '';
         $module_count = 0;
         
         wp_register_script('wcb_widget-main-js', PLUGIN_URI . 'woocommerce-brands/public/js/wcb_widget-main.js');
         wp_enqueue_script('wcb_widget-main-js');
+        wp_register_style('frontendMain-css', PLUGIN_URI . 'woocommerce-brands/public/css/jquery-ui.css');
+        wp_enqueue_style('frontendMain-css');
+        wp_register_script('frontendMain-js', PLUGIN_URI . 'woocommerce-brands/public/js/jquery-ui.js');
+        wp_enqueue_script('frontendMain-js');
 
         $output .= '<form id="wcb_filterForm" class="wcb_form">';
 
         if (in_array('priceSlider', $args)) {
-            wp_register_style('priceSlider-css', PLUGIN_URI . 'woocommerce-brands/public/css/jquery-ui.css');
-            wp_enqueue_style('priceSlider-css');
-            wp_register_script('priceSlider-js', PLUGIN_URI . 'woocommerce-brands/public/js/jquery-ui.js');
-            wp_enqueue_script('priceSlider-js');
             $output .= wcb_get_html_component('slider');
             $module_count++;
         } //in_array('priceSlider', $args)
+
+		if (in_array('brandsTiles', $args)) {
+            $output .= wcb_get_html_component('tiles');
+            $module_count++;
+        }
+
+        if (in_array('brandsChecklist', $args)) {
+            $output .= wcb_get_html_component('checkboxes');
+            $module_count++;
+        }
         
         if ($module_count > 0) {
             $output .= '<button id="wcb_form_update_btn">Update</button>';
@@ -240,50 +341,50 @@ if (!function_exists('wcb_adjustLimit')) {
 } //!function_exists('wcb_adjustLimit')
 
 
-if (!function_exists('wcb_set_price_filter')) {
-    /**
-     * Public function to set the min & max price of products returned
-     *
-     * @return object
-     */
-    function wcb_set_price_filter($filtered_posts)
-    {
-        //TODO: get some details about the query
-        global $wpdb;
+// if (!function_exists('wcb_set_price_filter')) {
+//     /**
+//      * Public function to set the min & max price of products returned
+//      *
+//      * @return object
+//      */
+//     function wcb_set_price_filter($filtered_posts)
+//     {
+//         //TODO: get some details about the query
+//         global $wpdb;
         
-        if (@$_POST['price']) {
-            $matched_products = array( 0 );
-            $min              = floatval($_POST['price'][0]);
-            $max              = floatval($_POST['price'][1]);
+//         if (@$_POST['price']) {
+//             $matched_products = array( 0 );
+//             $min              = floatval($_POST['price'][0]);
+//             $max              = floatval($_POST['price'][1]);
             
-            $matched_products_query = apply_filters('woocommerce_price_filter_results', $wpdb->get_results($wpdb->prepare("
-                SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
-                INNER JOIN $wpdb->postmeta ON ID = post_id
-                WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
-            ", '_price', $min, $max), OBJECT_K), $min, $max);
+//             $matched_products_query = apply_filters('woocommerce_price_filter_results', $wpdb->get_results($wpdb->prepare("
+//                 SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
+//                 INNER JOIN $wpdb->postmeta ON ID = post_id
+//                 WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
+//             ", '_price', $min, $max), OBJECT_K), $min, $max);
             
-            if ($matched_products_query) {
-                foreach ($matched_products_query as $product) {
-                    if ($product->post_type == 'product')
-                        $matched_products[] = $product->ID;
-                    if ($product->post_parent > 0 && !in_array($product->post_parent, $matched_products))
-                        $matched_products[] = $product->post_parent;
-                } //$matched_products_query as $product
-            } //$matched_products_query
+//             if ($matched_products_query) {
+//                 foreach ($matched_products_query as $product) {
+//                     if ($product->post_type == 'product')
+//                         $matched_products[] = $product->ID;
+//                     if ($product->post_parent > 0 && !in_array($product->post_parent, $matched_products))
+//                         $matched_products[] = $product->post_parent;
+//                 } //$matched_products_query as $product
+//             } //$matched_products_query
             
-            // Filter the id's
-            if (sizeof($filtered_posts) == 0) {
-                $filtered_posts = $matched_products;
-            } //sizeof($filtered_posts) == 0
-            else {
-                $filtered_posts = array_intersect($filtered_posts, $matched_products);
-            }
+//             // Filter the id's
+//             if (sizeof($filtered_posts) == 0) {
+//                 $filtered_posts = $matched_products;
+//             } //sizeof($filtered_posts) == 0
+//             else {
+//                 $filtered_posts = array_intersect($filtered_posts, $matched_products);
+//             }
             
-        } //@$_POST['price']
+//         } //@$_POST['price']
         
-        return (array) $filtered_posts;
-    }
-} //!function_exists('wcb_set_price_filter')
+//         return (array) $filtered_posts;
+//     }
+// } //!function_exists('wcb_set_price_filter')
 
 
 if (!function_exists('wcb_addFilters')) {
@@ -295,20 +396,36 @@ if (!function_exists('wcb_addFilters')) {
     function wcb_addFilters($query)
     {
     	global $wcbFilter;
+    	// todo only add filters on the shop pages
         if ($query->is_main_query() && !is_admin() ) {
-        	if (wcb_sort_queries($_GET)['price']) {
-	        	$params = $wcbFilter->get_params();
+        	$requestedFilters = wcb_sort_queries($_GET);
+        	$params = $wcbFilter->get_params();
+        	$toQuery = array();
+
+        	// Price
+        	if ($requestedFilters['price']) {
 	        	$min_price = $params['price'][0];
 	        	$max_price = $params['price'][1];
-	        	set_query_var('meta_query', array(
-	        		array(
-	        			'key' => '_price',
-		        		'value' => array($min_price, $max_price),
-		        		'type' => 'NUMERIC',
-		        		'compare' => "BETWEEN"
-		        		),
-	        		));
+	        	$toQuery[] = array(
+			        			'key' => '_price',
+				        		'value' => array($min_price, $max_price),
+				        		'type' => 'NUMERIC',
+				        		'compare' => "BETWEEN"
+				        	);
 	        }
+	        // Brand
+	        if ($requestedFilters['brand']) {
+	        	$limitBrands = is_array($params['brand']) ? $params['brand'] : array(0 => $params['brand']);
+	        	$toQuery[] = array(
+			        			'key' => 'wcb_brand',
+				        		'value' => $limitBrands,
+				        		'type' => 'NUMERIC',
+				        		'compare' => "IN"
+			        		);
+	        }
+
+			if (count($toQuery)) set_query_var('meta_query', $toQuery);
+
         } //$query->is_main_query()
     }
 } //!function_exists('wcb_addFilters')
@@ -331,7 +448,7 @@ if (!function_exists('wcb_get_attributes')) {
             } //$attribute_taxonomies as $tax
         } //$attribute_taxonomies
         
-        
+        logit($attributes);
         return apply_filters('wcb_A_get_attributes', $attributes);
     }
 } //!function_exists('wcb_get_attributes')
