@@ -17,19 +17,21 @@
  */
 
 $wcb_latest_version = '0.1.0';
+if (!defined('WCB_VERSION_KEY'))
+	define('WCB_VERSION_KEY', 'wcb__currentversion');
 
 if (!defined('WCB_PLUGIN_NAME'))
-define('WCB_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
+	define('WCB_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
 
 if (!defined('WCB_PLUGIN_DIR'))
-define('WCB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . WCB_PLUGIN_NAME);
+	define('WCB_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . WCB_PLUGIN_NAME);
 
 if (!defined('WCB_PLUGIN_URL'))
-define('WCB_PLUGIN_URL', WP_PLUGIN_URL . '/' . WCB_PLUGIN_NAME);
+	define('WCB_PLUGIN_URL', WP_PLUGIN_URL . '/' . WCB_PLUGIN_NAME);
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
-die;
+	die;
 
 // upgrade info
 if (get_option(WCB_VERSION_KEY) != $wcb_latest_version) {

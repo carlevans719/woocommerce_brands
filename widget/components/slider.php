@@ -1,35 +1,36 @@
 <?php
 global $wcbFilter;
 $price = $wcbFilter->get_params()['price'];
-$absPrice = $wcbFilter->get_params()['absPrice'];
-$absMin_price = $absPrice[0];
-$absMax_price = $absPrice[1];
-$min_price = $price[0];
-$max_price = $price[1] ? $price[1] : $absMax_price;
-$componentMarkup = '<div class="sliderWrapper"><script>
-(function( $ ) {
-    $(function() {
-        $( "#slider-range" ).slider({
-            range: true,
-            min: '. $absMin_price .',
-            max: '. $absMax_price .',
-            values: [ '. $min_price . ', ' . $max_price .' ],
-            slide: function( event, ui ) {
-                $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
-                $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
-                $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
-                $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
-            }
+$availablePrices = $wcbFilter->get_params()['availablePrices'];
+$price[1] = count($price) == 2 ? $price[1] : $availablePrices[1];
+if (isset($availablePrices[0]) && ( ($availablePrices[0] === 999999 && $availablePrices[1] === 0) || ($availablePrices[0] === 0 && $availablePrices[1] === 0) ) ) {
+    $componentMarkup = '';
+} else {
+    $componentMarkup = '<div class="sliderWrapper"><script>
+    (function( $ ) {
+        $(function() {
+            $( "#slider-range" ).slider({
+                range: true,
+                min: '. $availablePrices[0] .',
+                max: '. $availablePrices[1] .',
+                values: [ '. $price[0] . ', ' . $price[1] .' ],
+                slide: function( event, ui ) {
+                    $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
+                    $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
+                    $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
+                    $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
+                }
+            });
+            $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
+            $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
+            $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
+            $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
         });
-        $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
-        $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
-        $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
-        $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
-    });
-})( jQuery );
-</script>
+    })( jQuery );
+    </script>
 
-<input name="price_min" type="hidden" id="wcb_price_min">
-<input name="price_max" type="hidden" id="wcb_price_max">
-<div id="slider-range" data-min="£'.$absMin_price.'" data-max="£'.$absMax_price.'"></div></div>
-';
+    <input name="price_min" type="hidden" id="wcb_price_min">
+    <input name="price_max" type="hidden" id="wcb_price_max">
+    <div id="slider-range" data-min="£'.$availablePrices[0].'" data-max="£'.$availablePrices[1].'"></div></div>
+    ';
+};
