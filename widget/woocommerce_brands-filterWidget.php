@@ -154,21 +154,23 @@ class wcb_FilterWidget extends WP_Widget
      */
     public function widget($args, $instance)
     {
-    	// todo only show widget on the shop pages
+        if (is_shop()) {
 
-        echo $args['before_widget'];
-        if (!empty($instance['title'])) {
-            echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
-        } //!empty($instance['title'])
-        
-        $params = array();
-        // Price slider
-        if ($instance['filterBy-price']) $params[] = 'priceSlider';
-        // Brands
-        if ($instance['filterBy-brand']) $params[] = $instance['filterBy-brand-layout'] == 'tiles' ? 'brandsTiles' : 'brandsChecklist';
-        echo self::get_widget_html($params);
-        
-        echo $args['after_widget'];
+            echo $args['before_widget'];
+            if (!empty($instance['title'])) {
+                echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
+            } //!empty($instance['title'])
+            
+            $params = array();
+            // Price slider
+            if ($instance['filterBy-price']) $params[] = 'priceSlider';
+            // Brands
+            if ($instance['filterBy-brand']) $params[] = $instance['filterBy-brand-layout'] == 'tiles' ? 'brandsTiles' : 'brandsChecklist';
+            echo self::get_widget_html($params);
+            
+            echo $args['after_widget'];
+
+        }
     }
 
     
@@ -410,7 +412,7 @@ if (!function_exists('wcb_addFilters')) {
     {
     	global $wcbFilter;
     	// todo only add filters on the shop pages
-        if ($query->is_main_query() && !is_admin() ) {
+        if ($query->is_main_query() && is_shop() ) {
         	$requestedFilters = wcb_sort_queries($_GET);
         	$params = $wcbFilter->get_params();
         	$toQuery = array();
@@ -461,7 +463,6 @@ if (!function_exists('wcb_get_attributes')) {
             } //$attribute_taxonomies as $tax
         } //$attribute_taxonomies
         
-        logit($attributes);
         return apply_filters('wcb_A_get_attributes', $attributes);
     }
 } //!function_exists('wcb_get_attributes')
