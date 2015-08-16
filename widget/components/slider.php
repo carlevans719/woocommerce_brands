@@ -14,11 +14,13 @@ if (isset($availablePrices[0]) && ( ($availablePrices[0] === 999999 && $availabl
                 min: '. $availablePrices[0] .',
                 max: '. $availablePrices[1] .',
                 values: [ '. $price[0] . ', ' . $price[1] .' ],
+                step: 0.01,
                 slide: function( event, ui ) {
-                    $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
-                    $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
-                    $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
-                    $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
+                    console.log(ui);
+                    $( "#wcb_price_min" ).val( ui.values[0] );
+                    $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + ui.values[0] );
+                    $( "#wcb_price_max" ).val( ui.values[1] );
+                    $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + ui.values[1] );
                 }
             });
             $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
