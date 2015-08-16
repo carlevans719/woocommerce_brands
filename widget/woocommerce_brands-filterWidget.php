@@ -154,7 +154,7 @@ class wcb_FilterWidget extends WP_Widget
      */
     public function widget($args, $instance)
     {
-        if (is_shop()) {
+        if (is_shop() || is_product_category()) {
 
             echo $args['before_widget'];
             if (!empty($instance['title'])) {
@@ -412,7 +412,7 @@ if (!function_exists('wcb_addFilters')) {
     {
     	global $wcbFilter;
     	// todo only add filters on the shop pages
-        if ($query->is_main_query() && is_shop() ) {
+        if ($query->is_main_query() && (is_shop() || is_product_category()) ) {
         	$requestedFilters = wcb_sort_queries($_GET);
         	$params = $wcbFilter->get_params();
         	$toQuery = array();

@@ -8,7 +8,7 @@
  * Plugin Name:				Woocommerce Brands
  * Plugin URI:        TBC
  * Description:       Adds custom post type for brands. E.g "McDonalds", or "KFC". Adds this to the Woocommerce product taxonomy and allows customers to filter products by it
- * Version:           0.1.0
+ * Version:           0.1.13
  * Author:            Carl Evans
  * Author URI:        TBC
  * License:           GPL-2.0+
@@ -90,7 +90,7 @@ function wcb_add_custom_fields() {
 	$args = array('post_type' => 'wcb_brand');
 	$the_query = null;
 	$brand_ids[] = null;
-	$brand_names[] = null;
+	$brand_names[] = '';
 	$the_query = new WP_Query($args);
 	if( $the_query->have_posts() ) {
 		foreach ($the_query->get_posts() as $key => $value) {
@@ -119,6 +119,8 @@ function wcb_save_custom_fields( $post_id ) {
 	$woocommerce_select = $_POST['brand_select'];
 	if( !empty( $woocommerce_select ) ) {
 		update_post_meta( $post_id, 'wcb_brand', esc_attr( $woocommerce_select ) );
+	} else {
+		delete_post_meta( $post_id, 'wcb_brand' );
 	}
 }
 add_action( 'woocommerce_process_product_meta', 'wcb_save_custom_fields' );
