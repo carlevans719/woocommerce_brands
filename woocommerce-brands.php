@@ -83,27 +83,30 @@ register_deactivation_hook( __FILE__, 'deactivate_woocommerce_brands' );
 
 function wcb_add_custom_fields() {
 	global $woocommerce, $post;
+	$args = $brand_ids = $brand_names = array();
 
-	  $output = '<div class="options_group">';
-		$args = array('post_type' => 'wcb_brand');
-		$the_query = null;
-		$the_query = new WP_Query($args);
-		if( $the_query->have_posts() ) {
-			$brand_ids = $brand_names = array();
-			foreach ($the_query->get_posts() as $key => $value) {
-				$brand_ids[] = $value->ID;
-				$brand_names[] = $value->post_title;
-			}
-			$select_options = array_combine($brand_ids, $brand_names);
+	$output = '<div class="options_group">';
+	
+	$args = array('post_type' => 'wcb_brand');
+	$the_query = null;
+	$brand_ids[] = null;
+	$brand_names[] = null;
+	$the_query = new WP_Query($args);
+	if( $the_query->have_posts() ) {
+		foreach ($the_query->get_posts() as $key => $value) {
+			$brand_ids[] = $value->ID;
+			$brand_names[] = $value->post_title;
 		}
-		wp_reset_query();  // Restore global post data stomped by the_post().
-		woocommerce_wp_select(
-			array(
-				'id'      => 'brand_select',
-				'label'   => 'Product\'s Brand',
-				'options' => $select_options
-				)
-			);
+		$select_options = array_combine($brand_ids, $brand_names);
+	}
+	wp_reset_query();  // Restore global post data stomped by the_post().
+	woocommerce_wp_select(
+		array(
+			'id'      => 'brand_select',
+			'label'   => 'Product\'s Brand',
+			'options' => $select_options
+			)
+		);
 	  // Custom fields will be created here...
 
 	  $output .= '</div>';
