@@ -1,4 +1,6 @@
 (function( $ ) {
+  wcbHandlers = {};
+
   $.fn.serializeObject = function() {
     var o = {};
     var a = this.serializeArray();
@@ -15,29 +17,53 @@
     return o;
   };
 
-  $('div.tilesWrapper .tileItem').on("click", function(e) {
-    if ( $(e.currentTarget).is('.selected') ) {
-      $(e.currentTarget).attr("data-content", "");
-      $(e.currentTarget).removeClass("selected");
-    } else {
-      // todo: add a tick code to the line below instead of an 'x'
-      $(e.currentTarget).attr("data-content", "X");
-      $(e.currentTarget).addClass("selected");
-    };
-  });
+  setupHandlers = function() {
+    $('div.tilesWrapper .tileItem').off();
+    wcbHandlers.tiles = $('div.tilesWrapper .tileItem').on("click", function(e) {
+      if ( $(e.currentTarget).is('.selected') ) {
+        $(e.currentTarget).attr("data-content", "");
+        $(e.currentTarget).removeClass("selected");
+      } else {
+        // todo: add a tick code to the line below instead of an 'x'
+        $(e.currentTarget).attr("data-content", "X");
+        $(e.currentTarget).addClass("selected");
+      };
+    });
 
-  $('.brandCheck-checkboxWrapper .brandCheck-checkbox').on("click", function(e){
-    if ( $(e.currentTarget).is('.selected') ) {
-      $(e.currentTarget).removeClass("selected");
-    } else {
-      // todo: add a tick code to the line below instead of an 'x'
-      $(e.currentTarget).addClass("selected");
-    };
-  });
+    $('.brandCheck-checkboxWrapper .brandCheck-checkbox').off();
+    wcbHandlers.checks = $('.brandCheck-checkboxWrapper .brandCheck-checkbox').on("click", function(e){
+      if ( $(e.currentTarget).is('.selected') ) {
+        $(e.currentTarget).removeClass("selected");
+      } else {
+        // todo: add a tick code to the line below instead of an 'x'
+        $(e.currentTarget).addClass("selected");
+      };
+    });
 
-  $('#wcb_form_update_btn').on("click", function () {
-      wcb_update_filter(event);
-  });
+    $('#wcb_form_update_btn').off();
+    $('#wcb_form_update_btn').on("click", function () {
+        wcb_update_filter(event);
+    });
+
+    $('#wcb_form_reset_btn').off();
+    $('#wcb_form_reset_btn').on("click", function () {
+        wcb_clear_filter(event);
+    });
+
+  };
+
+  var wcb_clear_filter = function(event) {
+    event.preventDefault();
+
+    $('#main').load(window.location.href + ' #main', function(){ 
+      $('.widget.widget_wcb-filterwidget').load(window.location.href + ' .widget.widget_wcb-filterwidget', function() {
+        console.log("hey");
+        setupHandlers();
+        wcbSliderInit();
+      });
+    });
+    return false;
+  };
 
   var wcb_update_filter = function(event) {
     event.preventDefault();
@@ -82,7 +108,10 @@
         workingHref += newQuery;
       }
     }
-    window.location.href = workingHref;
+    $('#main').load(workingHref + ' #main');
+    $('button#wcb_form_reset_btn').attr('disabled', false);
     return false;
   }
+
+  setupHandlers();
 })( jQuery );

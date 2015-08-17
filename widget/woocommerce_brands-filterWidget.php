@@ -337,7 +337,7 @@ class wcb_FilterWidget extends WP_Widget
         }
 
         if ($module_count > 0) {
-            $output .= '<button id="wcb_form_update_btn">Update</button>';
+            $output .= '<button id="wcb_form_reset_btn" disabled>Reset</button><button id="wcb_form_update_btn">Update</button>';
         } //$module_count > 0
         $output .= '</form>';
 
