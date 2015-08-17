@@ -16,7 +16,6 @@ if (isset($availablePrices[0]) && ( ($availablePrices[0] === 999999 && $availabl
                 values: [ '. $price[0] . ', ' . $price[1] .' ],
                 step: 0.01,
                 slide: function( event, ui ) {
-                    console.log(ui);
                     $( "#wcb_price_min" ).val( ui.values[0] );
                     $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + ui.values[0] );
                     $( "#wcb_price_max" ).val( ui.values[1] );

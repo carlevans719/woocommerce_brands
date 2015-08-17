@@ -48,22 +48,34 @@ class wcb_FilterWidget extends WP_Widget
     	The ONLY limits on this query are those by post_type (if it is 'product')
     	and product_cat
     	*/
+         // Are we restricted by category?
+        $cat = '';
+        $category_slug = get_option('woocommerce_product_category_slug') ? get_option('woocommerce_product_category_slug') : _x( 'product-category', 'slug', 'woocommerce' );
+        if (strrpos($_SERVER['REQUEST_URI'], $category_slug) !== false) {
+            $pieces = explode('/', $_SERVER['REQUEST_URI']);
+            if (!$pieces[count($pieces) - 1] || strrpos($pieces[count($pieces) - 1], '?') !== false || strrpos($pieces[count($pieces) - 1], '#') !== false) unset($pieces[count($pieces) - 1]);
+            $pieces = array_slice($pieces, array_search($category_slug, $pieces));
+            do {
+                array_shift($pieces);
+            } while (count($pieces) > 1);
+            $cat = $pieces[0];
+            if (strrpos($cat, '?') !== false) $cat = substr($cat, 0, strrpos($cat, '?'));
+        } else if (isset($_GET['product_cat'])) {
+            $cat = $_GET['product_cat'];
+        }
 
-    	// Might regret this but cancel if we aren't using $_GET to query for products
-    	if (!$_GET || ( !isset($_GET['post_type']) && !isset($_GET['product_cat']) ) ) return false;
-
-		if (isset($_GET['product_cat'])) {
+		if ($cat) {
 			$toQuery = array(
 				array(
 					'taxonomy' => 'product_cat',
 					'field' => 'slug',
-					'terms' => array($_GET['product_cat']),
+					'terms' => array($cat),
 					'operator' => 'IN'
 				),
 				array(
 					'taxonomy' => 'product_cat',
 					'field' => 'slug',
-					'terms' => array($_GET['product_cat']),
+					'terms' => array($cat),
 					'operator' => 'IN',
 					'include_children' => 0
 				),
