@@ -486,3 +486,22 @@ div#slider-range {
   margin: 5px;;
   float: left;
 }
+
+
+span.ui-slider-handle.ui-state-default.ui-corner-all:after {
+    margin-top: -14px;
+    margin-left: -20px;
+    color: #ffffff;
+}span.ui-slider-handle.ui-state-default.ui-corner-all {
+    border-radius: 0;
+    padding: 0 25px;
+    background-color: #007df1;
+}
+
+span.ui-slider-handle:first-child {
+    background-color: rgb(2, 88, 167);
+}
+
+span.ui-slider-handle.ui-state-default.ui-corner-all:first-child {
+    background-color: #004C92;
+}

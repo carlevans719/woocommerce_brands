@@ -2,3 +2,29 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+ .priceOptions-container, .brandOptions-container {
+    margin-left: 5px;
+    border-left: #ccc 1px solid;
+    padding-left: 5px;
+}
+
+input.priceOptions-priceTitle, input.brandOptions-brandTitle {
+    width: 250px;
+    max-width: 90%;
+}
+
+label.filterLabel {
+	width: 150px;
+	display: block;
+	position: relative;
+}
+
+label.filterLabel input {
+	position: absolute;
+	right: 0;
+}
+
+.brandOptions-brandLayout {
+	display: block;
+	margin-top: 10px;
+}

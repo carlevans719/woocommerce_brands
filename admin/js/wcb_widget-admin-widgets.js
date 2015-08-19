@@ -8,7 +8,6 @@
 
 	
 	jQuery(document).ajaxSuccess(function(e, xhr, settings) {
-		console.log(settings.data);
 		if(settings.data.search('action=save-widget') != -1 && (settings.data.search('widget-id=wcb-filterwidget') != -1 || settings.data.search('id_base=wcb-filterwidget') != -1) ) {
 			add_wcb_handlers($);
 		}
@@ -20,7 +19,15 @@ function add_wcb_handlers($) {
 
 	$('input.brandLayoutVal').val($('input.brandLayoutVal').attr("data-value"));
 
-	$('input.brandCheck').on("change", function(e) {
+	$('input.priceOptions-priceCheck').on("change", function(e) {
+		if (e.currentTarget.checked === true) {
+			$('div.priceOptions-container').slideDown();
+		} else if (e.currentTarget.checked === false) {
+			$('div.priceOptions-container').slideUp();
+		}
+	});
+
+	$('input.brandOptions-brandCheck').on("change", function(e) {
 		if (e.currentTarget.checked === true) {
 			$('div.brandOptions-container').slideDown();
 		} else if (e.currentTarget.checked === false) {
