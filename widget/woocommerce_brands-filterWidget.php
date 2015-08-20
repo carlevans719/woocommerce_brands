@@ -11,7 +11,7 @@ class wcb_FilterWidget extends WP_Widget {
         parent::__construct( 'wcb-FilterWidget', // Base ID
             'Brands Filter', // Name
             array(
-             'description' => 'Front-end filter widget for the Woocommerce Brands plugin' 
+             'description' => 'Front-end filter widget for the Woocommerce Brands plugin'
         ) // Args
             );
         add_filter( 'posts_orderby', 'wcb_reOrder' );
@@ -56,20 +56,20 @@ class wcb_FilterWidget extends WP_Widget {
                      'taxonomy' => 'product_cat',
                     'field' => 'slug',
                     'terms' => array(
-                         $cat 
+                         $cat
                     ),
-                    'operator' => 'IN' 
+                    'operator' => 'IN'
                 ),
                 array(
                      'taxonomy' => 'product_cat',
                     'field' => 'slug',
                     'terms' => array(
-                         $cat 
+                         $cat
                     ),
                     'operator' => 'IN',
-                    'include_children' => 0 
+                    'include_children' => 0
                 ),
-                'relation' => 'OR' 
+                'relation' => 'OR'
             );
             $this->instance_params[ 'tax_query' ] = $toQuery;
         } //$cat
@@ -96,7 +96,7 @@ class wcb_FilterWidget extends WP_Widget {
 
         // End of loop
         endwhile;
-        // Set the available brands to those found 
+        // Set the available brands to those found
         $this->instance_params[ 'availableBrands' ] = $availableBrands;
         if ( wcb_sort_queries( $_GET ) ) {
             // Set the list of filters that are currently being used (to those in the $_GET)
@@ -109,13 +109,13 @@ class wcb_FilterWidget extends WP_Widget {
         // Set the min/max available prices of products found by this query
         $this->instance_params[ 'availablePrices' ] = array(
              0 => $min_price,
-            1 => $max_price 
+            1 => $max_price
         );
         if ( ( array_search( 'price', $activeFilters ) === false ) || ( !isset( $this->instance_params[ 'price' ] ) ) || ( $this->instance_params[ 'price' ][ 0 ] > $this->instance_params[ 'price' ][ 1 ] ) ) {
             // If we aren't filtering by price (or if the requested filter is invalid) then set the price limits to the min/max
             $this->instance_params[ 'price' ] = array(
                  0 => $min_price,
-                1 => $max_price 
+                1 => $max_price
             );
         } //( array_search( 'price', $activeFilters ) === false ) || ( !isset( $this->instance_params[ 'price' ] ) ) || ( $this->instance_params[ 'price' ][ 0 ] > $this->instance_params[ 'price' ][ 1 ] )
         else {
@@ -174,7 +174,7 @@ class wcb_FilterWidget extends WP_Widget {
         $domSelector   = ( !empty( $instance[ 'dom-product-container' ] ) ? $instance[ 'dom-product-container' ] : '#main' );
 
         /* todo: change to an array.
-        so 
+        so
         $instance['filterBy-brand-layout'] = array(
         'checkboxes' => false,
         'tiles' => true
@@ -191,10 +191,10 @@ class wcb_FilterWidget extends WP_Widget {
         // Feed values generated above in to one of these arrays
         $filterBy = array(
              'price' => $filterByPrice,
-            'brand' => $filterByBrand 
+            'brand' => $filterByBrand
         );
         $options  = array(
-             'brandLayout' => $filterByBrandLayout 
+             'brandLayout' => $filterByBrandLayout
         );
         wp_register_script( 'wcb_widget-admin-widgets-js', PLUGIN_URI . 'woocommerce-brands/admin/js/wcb_widget-admin-widgets.js' );
         wp_enqueue_script( 'wcb_widget-admin-widgets-js' );
@@ -217,19 +217,19 @@ class wcb_FilterWidget extends WP_Widget {
               </p>
           </fieldset>
           <h4>Filters:</h4>
-          
+
 
           <?php/* PRICE FILTER */?>
           <fieldset>
             <p>
                 <label class="filterLabel" for="<?php echo $this->get_field_id( 'filterBy-price' );?>">
-                    <?php echo 'Price: ';?>
                     <input class="widefat priceOptions-priceCheck" id="<?php echo $this->get_field_id( 'filterBy-price' );?>" name="<?php echo $this->get_field_name( 'filterBy-price' );?>" type="checkbox" <?php if ( esc_attr( $filterBy[ 'price' ] ) == true ) echo "checked";?>>
+                    <?php echo 'Price';?>
                 </label>
                 <div class="priceOptions-container"<?php if ( !esc_attr( $filterBy[ 'price' ] ) ) echo ' style="display: none;"';?>>
                     <label for="<?php echo $this->get_field_id( 'filterBy-price-title' );?>">
                         <?php echo 'Title: ';?>
-                        <input class="widefat priceOptions-priceTitle" id="<?php echo $this->get_field_id( 'filterBy-price-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-price-title' );?>" value="<?php echo esc_attr( $priceTitle );?>">
+                        <input class="widefat priceOptions-priceTitle" type="text" id="<?php echo $this->get_field_id( 'filterBy-price-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-price-title' );?>" value="<?php echo esc_attr( $priceTitle );?>">
                     </label>
                 </div>
             </p>
@@ -241,13 +241,13 @@ class wcb_FilterWidget extends WP_Widget {
           <fieldset>
               <p>
                   <label class="filterLabel" for="<?php echo $this->get_field_id( 'filterBy-brand' );?>">
-                    <?php echo 'Brand: ';?>
                     <input class="widefat brandOptions-brandCheck" id="<?php echo $this->get_field_id( 'filterBy-brand' );?>" name="<?php echo $this->get_field_name( 'filterBy-brand' );?>" type="checkbox"<?php if ( esc_attr( $filterBy[ 'brand' ] ) ) echo " checked";?>>
+                    <?php echo 'Brand';?>
                   </label>
-                  <div class="brandOptions-container"<?php if ( !esc_attr( $filterBy[ 'brand' ] ) ) echo ' style="display:none;"';?>>         
+                  <div class="brandOptions-container"<?php if ( !esc_attr( $filterBy[ 'brand' ] ) ) echo ' style="display:none;"';?>>
                     <label for="<?php echo $this->get_field_id( 'filterBy-brand-title' );?>">
                         <?php echo 'Title: ';?>
-                        <input class="widefat brandOptions-brandTitle" id="<?php echo $this->get_field_id( 'filterBy-brand-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-brand-title' );?>" type="<?php echo ( !esc_attr( $filterBy[ 'brand' ] ) ) ? "hidden" : "text";?>" value="<?php echo esc_attr( $brandTitle );?>">
+                        <input class="widefat brandOptions-brandTitle" id="<?php echo $this->get_field_id( 'filterBy-brand-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-brand-title' );?>" type="text" value="<?php echo esc_attr( $brandTitle );?>">
                     </label><br>
                     <?php
                         if ( $options[ 'brandLayout' ] == 'checkboxes' ) {
@@ -261,7 +261,7 @@ class wcb_FilterWidget extends WP_Widget {
                             $layoutValue   = 'tiles';
                         }
                     ?>
-                    
+
                     <label class="brandOptions-brandLayout" for="filterBy-brand-layout--tiles"><input class="widefat brandLayout" type="radio" name="filterBy-brand-layout" id="filterBy-brand-layout--tiles" value="tiles" <?php echo $tilesChecked;?>>Thumbnail tiles</label>
                     <label class="brandOptions-brandLayout" for="filterBy-brand-layout--checkboxes"><input class="widefat brandLayout" type="radio" name="filterBy-brand-layout" id="filterBy-brand-layout--checkboxes" value="checkboxes" <?php echo $checksChecked;?>>List of checkboxes</label>
                     <input class="brandLayoutVal" type="hidden" name="<?php echo $this->get_field_name( 'filterBy-brand-layout' );?>" id="<?php echo $this->get_field_id( 'filterBy-brand-layout' );?>" data-value="<?php echo $layoutValue;?>">
@@ -294,12 +294,12 @@ class wcb_FilterWidget extends WP_Widget {
     private static function get_widget_html( $args ) {
         /* TODO: you're gunna have to use the following to dynamically build the admin form, the widget html, and the filter logic
         the html (admin and public) should be fairly trivial, but it will take some thought to get the filter logic working dynamically
-        
+
         wcb_get_attributes();
         returns
         Array
         (
-        [pa_color] => 
+        [pa_color] =>
         [pa_speed] => Speed
         )
         */
@@ -410,22 +410,22 @@ if ( !function_exists( 'wcb_addFilters' ) ) {
                      'key' => '_price',
                     'value' => array(
                          $min_price,
-                        $max_price 
+                        $max_price
                     ),
                     'type' => 'NUMERIC',
-                    'compare' => "BETWEEN" 
+                    'compare' => "BETWEEN"
                 );
             } //$requestedFilters[ 'price' ]
             // Brand
             if ( $requestedFilters[ 'brand' ] ) {
                 $limitBrands = is_array( $params[ 'brand' ] ) ? $params[ 'brand' ] : array(
-                     0 => $params[ 'brand' ] 
+                     0 => $params[ 'brand' ]
                 );
                 $toQuery[]   = array(
                      'key' => 'wcb_brand',
                     'value' => $limitBrands,
                     'type' => 'NUMERIC',
-                    'compare' => "IN" 
+                    'compare' => "IN"
                 );
             } //$requestedFilters[ 'brand' ]
             if ( count( $toQuery ) )

@@ -11,17 +11,16 @@
 input.priceOptions-priceTitle, input.brandOptions-brandTitle {
     width: 250px;
     max-width: 90%;
+    margin-left: 15px;
 }
 
 label.filterLabel {
-	width: 150px;
 	display: block;
 	position: relative;
 }
 
 label.filterLabel input {
-	position: absolute;
-	right: 0;
+  margin-right: 5px;
 }
 
 .brandOptions-brandLayout {
