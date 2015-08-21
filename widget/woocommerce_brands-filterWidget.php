@@ -3,28 +3,39 @@ define( "COMPONENTS_DIR", plugin_dir_path( __FILE__ ) . "components/" );
 define( 'PLUGIN_URI', plugins_url() . '/' );
 global $wcbFilter;
 class wcb_FilterWidget extends WP_Widget {
-    private $instance_params = array( 'post_type' => 'product', 'posts_per_page' => -1 );
+
+    private $instance_params = array(
+      'post_type' => 'product',
+      'posts_per_page' => -1
+    );
+
+
     /**
      * Sets up the widgets name etc
      */
     public function __construct() {
         parent::__construct( 'wcb-FilterWidget', // Base ID
-            'Brands Filter', // Name
-            array(
-             'description' => 'Front-end filter widget for the Woocommerce Brands plugin'
-        ) // Args
-            );
+          'Brands Filter', // Name
+          array(
+            'description' => 'Front-end filter widget for the Woocommerce Brands plugin'
+          ) // Args
+        );
+
         add_filter( 'posts_orderby', 'wcb_reOrder' );
         add_filter( 'post_limits', 'wcb_adjustLimit' );
+
         if ( taxonomy_exists( 'product_cat' ) )
             $this->run_the_loop();
+
         return $this;
     }
+
     public function get_params( $key = '' ) {
         if ( $key )
             return isset( $this->instance_params[ $key ] ) ? $this->instance_params[ $key ] : false;
         return $this->instance_params;
     }
+
     public function run_the_loop() {
         /*
         !!REMEMBER!!
@@ -46,33 +57,35 @@ class wcb_FilterWidget extends WP_Widget {
             $cat = $pieces[ 0 ];
             if ( strrpos( $cat, '?' ) !== false )
                 $cat = substr( $cat, 0, strrpos( $cat, '?' ) );
+
         } //strrpos( $_SERVER[ 'REQUEST_URI' ], $category_slug ) !== false
         else if ( isset( $_GET[ 'product_cat' ] ) ) {
             $cat = $_GET[ 'product_cat' ];
+
         } //isset( $_GET[ 'product_cat' ] )
         if ( $cat ) {
-            $toQuery                              = array(
-                 array(
-                     'taxonomy' => 'product_cat',
-                    'field' => 'slug',
-                    'terms' => array(
-                         $cat
-                    ),
-                    'operator' => 'IN'
-                ),
-                array(
-                     'taxonomy' => 'product_cat',
-                    'field' => 'slug',
-                    'terms' => array(
-                         $cat
-                    ),
-                    'operator' => 'IN',
-                    'include_children' => 0
-                ),
-                'relation' => 'OR'
-            );
+            $toQuery = array(
+                         array(
+                           'taxonomy' => 'product_cat',
+                           'field' => 'slug',
+                           'terms' => array(
+                             $cat
+                            ),
+                            'operator' => 'IN'
+                          ),
+                          array(
+                            'taxonomy' => 'product_cat',
+                            'field' => 'slug',
+                            'terms' => array(
+                              $cat
+                            ),
+                            'operator' => 'IN',
+                            'include_children' => 0
+                          ),
+                          'relation' => 'OR'
+                        );
             $this->instance_params[ 'tax_query' ] = $toQuery;
-        } //$cat
+          } //$cat
         // Declare vars
         $availablePrices = $availableBrands = $activeFilters = array();
         $loop            = $min_price = $max_price = $brandId = '';
@@ -94,10 +107,63 @@ class wcb_FilterWidget extends WP_Widget {
             if (get_post_meta(get_the_ID(), '_price')[0] > $max_price) $max_price = get_post_meta(get_the_ID(), '_price')[0];
             if ( (0 < get_post_meta(get_the_ID(), '_price')[0]) && (get_post_meta(get_the_ID(), '_price')[0] < $min_price) ) $min_price = get_post_meta(get_the_ID(), '_price')[0];
 
+
+            $customAttributes = get_post_meta(get_the_ID(), '_product_attributes')[0];
+            if ($customAttributes) {
+              foreach ($customAttributes as $attribute) {
+                logit(taxonomy_exists($attribute['name']));
+                $attributeTerms = get_terms( wc_attribute_taxonomy_name($attribute['name']), 'orderby=name&hide_empty=0' );
+                // if ( ( $customAttributes[$i] ) && ( !isset($availableAttributes[$customAttributes[$i]]) ) {
+                //   $availableAttributes[$customAttributes[$i]] = $attributeTerms;
+                // } else {
+                //   for ($j=0; $j < count($attributeTerms); $j++) {
+                //
+                //   }
+                // }
+                // !array_search( $customAttributes[$i], $availableAttributes ) ) ) {
+                // logit("attributeTerms are: ");
+                // logit($attributeTerms);
+
+                // logit("attribute is: ");
+                // logit($attribut/e);
+
+                // logit("customAttributes are: ");
+                // logit($customAttributes);
+
+                // logit("availableAttributes are: ");
+                // logit($availableAttributes);
+                }
+                    // $availableAttributes[ $customAttributes[$i] ] = isset( $availableAttributes[ $customAttributes[$i] ] ) ? $availableAttributes[ $customAttributes[$i] ] + 1 : 1;
+                    // Above says that if the term exists in the array of found terms, increase its value by 1, otherwise set it to one.
+                    // We need to actually determine if the term exists AS AN ARRAY in the array of found terms.
+                    // If it does - we need to determine this product's values and whether those are in the inner array, adding them if not.
+
+                    /*
+                    i.e.
+                    $customAttributes = array(
+                      0 => 'pa_speed',
+                      1 => 'pa_color'
+                    );
+                    $availableAttributes = array(
+                      'pa_speed' => array(
+                        '2mph' => 3,
+                        '1mph' => 1
+                      )
+                    )
+
+
+
+                    */
+              }
+            // }
         // End of loop
         endwhile;
         // Set the available brands to those found
         $this->instance_params[ 'availableBrands' ] = $availableBrands;
+
+        // Set the available custom attributes to those found
+        $this->instance_params[ 'availableAttributes' ] = $availableAttributes;
+
         if ( wcb_sort_queries( $_GET ) ) {
             // Set the list of filters that are currently being used (to those in the $_GET)
             $this->instance_params[ 'active_filters' ] = $activeFilters = array_keys( wcb_sort_queries( $_GET ) );
@@ -108,8 +174,8 @@ class wcb_FilterWidget extends WP_Widget {
         } //wcb_sort_queries( $_GET )
         // Set the min/max available prices of products found by this query
         $this->instance_params[ 'availablePrices' ] = array(
-             0 => $min_price,
-            1 => $max_price
+           0 => $min_price,
+           1 => $max_price
         );
         if ( ( array_search( 'price', $activeFilters ) === false ) || ( !isset( $this->instance_params[ 'price' ] ) ) || ( $this->instance_params[ 'price' ][ 0 ] > $this->instance_params[ 'price' ][ 1 ] ) ) {
             // If we aren't filtering by price (or if the requested filter is invalid) then set the price limits to the min/max
@@ -156,7 +222,15 @@ class wcb_FilterWidget extends WP_Widget {
             // Brands
             if ( $instance[ 'filterBy-brand' ] )
                 $params[] = $instance[ 'filterBy-brand-layout' ] == 'tiles' ? 'brandsTiles' : 'brandsChecklist';
-            echo self::get_widget_html( $params );
+
+            // custom attributes
+            $customAttributes = wcb_get_attributes();
+            $params['wcb_ca'] = array();
+
+            foreach ($customAttributes as $key => $value) {
+              if (strrpos($key, 'wcb_ca-') === 0) $params['wcb_ca'][] = substr($key, 7);
+            };
+            echo self::get_widget_html( $params, $instance );
             echo $args[ 'after_widget' ];
         } //is_shop() || is_product_category()
     }
@@ -166,12 +240,12 @@ class wcb_FilterWidget extends WP_Widget {
      * @param array $instance The widget options
      */
     public function form( $instance ) {
-        $title         = ( !empty( $instance[ 'title' ] ) ? $instance[ 'title' ] : 'Product filter' );
-        $priceTitle    = ( !empty( $instance[ 'filterBy-price-title' ] ) ? $instance[ 'filterBy-price-title' ] : 'Price' );
-        $filterByPrice = ( !empty( $instance[ 'filterBy-price' ] ) ? $instance[ 'filterBy-price' ] : false );
-        $brandTitle    = ( !empty( $instance[ 'filterBy-brand-title' ] ) ? $instance[ 'filterBy-brand-title' ] : 'Brand' );
-        $filterByBrand = ( !empty( $instance[ 'filterBy-brand' ] ) ? $instance[ 'filterBy-brand' ] : false );
-        $domSelector   = ( !empty( $instance[ 'dom-product-container' ] ) ? $instance[ 'dom-product-container' ] : '#main' );
+        $title         = ( isset( $instance[ 'title' ] ) ? $instance[ 'title' ] : 'Filter products by' );
+        $priceTitle    = ( isset( $instance[ 'filterBy-price-title' ] ) ? $instance[ 'filterBy-price-title' ] : 'Price:' );
+        $filterByPrice = ( isset( $instance[ 'filterBy-price' ] ) ? $instance[ 'filterBy-price' ] : false );
+        $brandTitle    = ( isset( $instance[ 'filterBy-brand-title' ] ) ? $instance[ 'filterBy-brand-title' ] : 'Brand:' );
+        $filterByBrand = ( isset( $instance[ 'filterBy-brand' ] ) ? $instance[ 'filterBy-brand' ] : false );
+        $domSelector   = ( isset( $instance[ 'dom-container-selector' ] ) ? $instance[ 'dom-container-selector' ] : '#main:' );
 
         /* todo: change to an array.
         so
@@ -190,11 +264,11 @@ class wcb_FilterWidget extends WP_Widget {
         }
         // Feed values generated above in to one of these arrays
         $filterBy = array(
-             'price' => $filterByPrice,
+            'price' => $filterByPrice,
             'brand' => $filterByBrand
         );
         $options  = array(
-             'brandLayout' => $filterByBrandLayout
+            'brandLayout' => $filterByBrandLayout
         );
         wp_register_script( 'wcb_widget-admin-widgets-js', PLUGIN_URI . 'woocommerce-brands/admin/js/wcb_widget-admin-widgets.js' );
         wp_enqueue_script( 'wcb_widget-admin-widgets-js' );
@@ -204,16 +278,16 @@ class wcb_FilterWidget extends WP_Widget {
               <label for="<?php echo $this->get_field_id( 'title' ); ?>">
                   <?php echo 'Widget Title:'; ?>
               </label>
-              <input class="widefat priceOptions-priceCheck" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
+              <input class="widefat priceOptions-priceCheck" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" placeholder="e.g Filter products by">
             </p>
         </fieldset>
 
           <fieldset>
               <p>
-                  <label for="<?php echo $this->get_field_id( 'dom-product-container' ); ?>">
+                  <label for="<?php echo $this->get_field_id( 'dom-container-selector' ); ?>">
                       <?php echo 'Product Container Selector:'; ?>
                   </label>
-                  <input type="text" name="<?php echo $this->get_field_name( 'dom-product-container' ); ?>" id="<?php echo $this->get_field_id( 'dom-product-container' ); ?>" class="widefat domContainer" value="<?php echo esc_attr( $domSelector );?>">
+                  <input type="text" name="<?php echo $this->get_field_name( 'dom-container-selector' ); ?>" id="<?php echo $this->get_field_id( 'dom-container-selector' ); ?>" class="widefat domContainer" value="<?php echo esc_attr( $domSelector );?>" placeholder="e.g #main">
               </p>
           </fieldset>
           <h4>Filters:</h4>
@@ -229,7 +303,7 @@ class wcb_FilterWidget extends WP_Widget {
                 <div class="priceOptions-container"<?php if ( !esc_attr( $filterBy[ 'price' ] ) ) echo ' style="display: none;"';?>>
                     <label for="<?php echo $this->get_field_id( 'filterBy-price-title' );?>">
                         <?php echo 'Title: ';?>
-                        <input class="widefat priceOptions-priceTitle" type="text" id="<?php echo $this->get_field_id( 'filterBy-price-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-price-title' );?>" value="<?php echo esc_attr( $priceTitle );?>">
+                        <input class="widefat priceOptions-priceTitle" type="text" id="<?php echo $this->get_field_id( 'filterBy-price-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-price-title' );?>" value="<?php echo esc_attr( $priceTitle );?>" placeholder="e.g Price: ">
                     </label>
                 </div>
             </p>
@@ -247,7 +321,7 @@ class wcb_FilterWidget extends WP_Widget {
                   <div class="brandOptions-container"<?php if ( !esc_attr( $filterBy[ 'brand' ] ) ) echo ' style="display:none;"';?>>
                     <label for="<?php echo $this->get_field_id( 'filterBy-brand-title' );?>">
                         <?php echo 'Title: ';?>
-                        <input class="widefat brandOptions-brandTitle" id="<?php echo $this->get_field_id( 'filterBy-brand-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-brand-title' );?>" type="text" value="<?php echo esc_attr( $brandTitle );?>">
+                        <input class="widefat brandOptions-brandTitle" id="<?php echo $this->get_field_id( 'filterBy-brand-title' );?>" name="<?php echo $this->get_field_name( 'filterBy-brand-title' );?>" type="text" value="<?php echo esc_attr( $brandTitle );?>" placeholder="e.g Brand: ">
                     </label><br>
                     <?php
                         if ( $options[ 'brandLayout' ] == 'checkboxes' ) {
@@ -268,7 +342,45 @@ class wcb_FilterWidget extends WP_Widget {
                   </div>
               </p>
           </fieldset>
+
         <?php
+        // TODO: tidy below
+          $otherAttribs = wcb_get_attributes();
+          /* CUSTOM ATTRIBUTES */
+          if (count($otherAttribs)) {
+?>
+            <fieldset>
+              <p class="customAttributes clearfix">
+                <label class="filterLabel" for="<?php echo $this->get_field_id( 'filterBy-brand' );?>">
+                  <?php echo 'Custom Attributes';?>
+                </label>
+              </p>
+              <div class="customAttributes-container clearfix">
+                <div class="customAttributes-containerInnter clearfix">
+                <select class="customAttributes-select" name="custom_attributes">
+                  <option value=""></option>
+<?php
+$extraMarkup = '';
+            foreach ($otherAttribs as $key => $value) {
+              $active = ( isset( $instance[ 'wcb_ca-'.$key ] ) );
+              $isHidden = !$active ? 'style="display: none;"' : '';
+              $currentVal = $active ? $instance[ 'wcb_ca-'.$key ] : '';
+              $identifier = $value ? $value : $key;
+              $extraMarkup .= '<div data-ca-key="'.$key.'" class="customAttributes-row clearfix" '.$isHidden.'><label class="customAttributes-row-label" for="'.$this->get_field_id( 'wcb_ca-'.$key ).'">Title for '.$identifier.'</label><button data-ca-key="'.$key.'" class="customAttributes-rm-btn">X</button><input id="'.$this->get_field_id( 'wcb_ca-'.$key ).'" type="text" name="'.$this->get_field_name( 'wcb_ca-'.$key ).'" value="'.$currentVal.'" class="customAttributes-input" placeholder="e.g '.$identifier.'"></div>';
+?>
+                  <option value="<?php echo $key; ?>"><?php echo $value ? $value : $key; ?></option>
+<?php
+            }
+?>
+                </select>
+                <button type="button" name="add_custom_attributes" class="customAttributes-btn">+</button>
+              </div>
+                <?php echo $extraMarkup; ?>
+
+              </div>
+            </fieldset>
+<?php
+          }
     }
     /**
      * Sanitize widget form values as they are saved.
@@ -282,27 +394,20 @@ class wcb_FilterWidget extends WP_Widget {
      */
     public function update( $new_instance, $old_instance ) {
         $instance                            = array();
-        $instance[ 'title' ]                 = ( !empty( $new_instance[ 'title' ] ) ) ? strip_tags( $new_instance[ 'title' ] ) : '';
-        $instance[ 'filterBy-price' ]        = ( !empty( $new_instance[ 'filterBy-price' ] ) ) ? (bool) strip_tags( $new_instance[ 'filterBy-price' ] ) : false;
-        $instance[ 'filterBy-price-title' ]  = ( !empty( $new_instance[ 'filterBy-price-title' ] ) ) ? strip_tags( $new_instance[ 'filterBy-price-title' ] ) : 'Price';
-        $instance[ 'filterBy-brand' ]        = ( !empty( $new_instance[ 'filterBy-brand' ] ) ) ? (bool) strip_tags( $new_instance[ 'filterBy-brand' ] ) : false;
-        $instance[ 'filterBy-brand-title' ]  = ( !empty( $new_instance[ 'filterBy-brand-title' ] ) ) ? strip_tags( $new_instance[ 'filterBy-brand-title' ] ) : 'Brand';
+        $instance[ 'title' ]                 = ( isset( $new_instance[ 'title' ] ) ) ? strip_tags( $new_instance[ 'title' ] ) : '';
+        $instance[ 'filterBy-price' ]        = ( isset( $new_instance[ 'filterBy-price' ] ) ) ? (bool) strip_tags( $new_instance[ 'filterBy-price' ] ) : false;
+        $instance[ 'filterBy-price-title' ]  = ( isset( $new_instance[ 'filterBy-price-title' ] ) ) ? strip_tags( $new_instance[ 'filterBy-price-title' ] ) : '';
+        $instance[ 'filterBy-brand' ]        = ( isset( $new_instance[ 'filterBy-brand' ] ) ) ? (bool) strip_tags( $new_instance[ 'filterBy-brand' ] ) : false;
+        $instance[ 'filterBy-brand-title' ]  = ( isset( $new_instance[ 'filterBy-brand-title' ] ) ) ? strip_tags( $new_instance[ 'filterBy-brand-title' ] ) : '';
         $instance[ 'filterBy-brand-layout' ] = ( !empty( $new_instance[ 'filterBy-brand-layout' ] ) ) ? strip_tags( $new_instance[ 'filterBy-brand-layout' ] ) : 'tiles';
-        $instance[ 'dom-container-selector' ]  = ( !empty( $new_instance[ 'dom-container-selector' ] ) ) ? strip_tags( $new_instance[ 'dom-container-selector' ] ) : '#main';
+        $instance[ 'dom-container-selector' ]  = ( isset( $new_instance[ 'dom-container-selector' ] ) ) ? strip_tags( $new_instance[ 'dom-container-selector' ] ) : '';
+        $availableCustomAttributes = wcb_get_attributes();
+        foreach ($availableCustomAttributes as $key => $value) {
+          $instance[ 'wcb_ca-'.$key ] = ( isset( $new_instance[ 'wcb_ca-'.$key ] ) ) ? strip_tags( $new_instance[ 'wcb_ca-'.$key ] ) : '';
+        }
         return $instance;
     }
-    private static function get_widget_html( $args ) {
-        /* TODO: you're gunna have to use the following to dynamically build the admin form, the widget html, and the filter logic
-        the html (admin and public) should be fairly trivial, but it will take some thought to get the filter logic working dynamically
-
-        wcb_get_attributes();
-        returns
-        Array
-        (
-        [pa_color] =>
-        [pa_speed] => Speed
-        )
-        */
+    private static function get_widget_html( $args, $instance ) {
         $output       = '';
         $module_count = 0;
         wp_register_script( 'wcb_widget-main-js', PLUGIN_URI . 'woocommerce-brands/public/js/wcb_widget-main.js' );
@@ -311,29 +416,49 @@ class wcb_FilterWidget extends WP_Widget {
         wp_enqueue_style( 'frontendMain-css' );
         wp_register_script( 'frontendMain-js', PLUGIN_URI . 'woocommerce-brands/public/js/jquery-ui.js' );
         wp_enqueue_script( 'frontendMain-js' );
-        $output .= '<form id="wcb_filterForm" class="wcb_form">';
+        $domSelector = $instance['dom-container-selector'] ? $instance['dom-container-selector'] : '#main';
+        $output .= '<div id="oneTimeScript"><script>/* wcb variables */ wcbGlobals = {"productContainerSelector": "'.trim($domSelector).'"}; document.getElementById("oneTimeScript").remove();</script></div>
+        <form id="wcb_filterForm" class="wcb_form clearfix">';
         if ( is_array( $args ) ) {
-            if ( in_array( 'priceSlider', $args ) ) {
-                $output .= wcb_get_html_component( 'slider' );
-                if ( wcb_get_html_component( 'slider' ) )
-                    $module_count++;
-            } //in_array('priceSlider', $args)
-            if ( in_array( 'brandsTiles', $args ) ) {
-                $output .= wcb_get_html_component( 'tiles' );
-                if ( wcb_get_html_component( 'tiles' ) )
-                    $module_count++;
-            } //in_array( 'brandsTiles', $args )
-            if ( in_array( 'brandsChecklist', $args ) ) {
-                $output .= wcb_get_html_component( 'checkboxes' );
-                if ( wcb_get_html_component( 'checkboxes' ) )
-                    $module_count++;
-            } //in_array( 'brandsChecklist', $args )
+          if ( in_array( 'priceSlider', $args ) ) {
+            if ( wcb_get_html_component( 'slider' ) ) {
+              $module_count++;
+              $output .= $instance['filterBy-price-title'] ? $instance['filterBy-price-title'] : '';
+              $output .= wcb_get_html_component( 'slider' );
+            }
+          } //in_array('priceSlider', $args)
+
+          if ( in_array( 'brandsTiles', $args ) ) {
+            if ( wcb_get_html_component( 'tiles' ) ) {
+              $module_count++;
+              $output .= $instance['filterBy-brand-title'] ? $instance['filterBy-brand-title'] : '';
+              $output .= wcb_get_html_component( 'tiles' );
+            }
+          } //in_array( 'brandsTiles', $args )
+
+          if ( in_array( 'brandsChecklist', $args ) ) {
+            if ( wcb_get_html_component( 'checkboxes' ) ) {
+              $module_count++;
+              $output .= $instance['filterBy-brand-title'] ? $instance['filterBy-brand-title'] : '';
+              $output .= wcb_get_html_component( 'checkboxes' );
+            }
+          } //in_array( 'brandsChecklist', $args )
+
+          // custom attributes
+          if (count($args['wcb_ca'])) {
+            $output .= $instance['filterBy-customAttributes-title'] ? $instance['filterBy-customAttributes-title'] : '';
+            $output .= wcb_get_html_component( 'generic_checkboxes' );
+            // logit(wcb_get_html_component( 'generic_checkboxes' ));
+          }
+
         } //is_array( $args )
         if ( $module_count > 0 ) {
-            $output .= '<button id="wcb_form_reset_btn" disabled>Reset</button><button id="wcb_form_update_btn">Update</button>';
+            $output .= '<button id="wcb_form_update_btn" class="sui-button--grey"><div class="wcbLoader" style="display: none;"></div>Update</button><button id="wcb_form_reset_btn" class="sui-button--grey disabled" disabled>Reset</button>';
         } //$module_count > 0
         $output .= '</form>';
         return $output;
+        // DEBUG
+        // return $output.'<pre>'.var_export($instance, true).'</pre>';
     }
 }
 if ( !function_exists( 'wcb_get_woocommerce_version' ) ) {

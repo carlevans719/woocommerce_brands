@@ -7,10 +7,23 @@ if (isset($availablePrices[0]) && ( ($availablePrices[0] === 999999 && $availabl
     $componentMarkup = '';
 } else {
     $componentMarkup = '
-    <div class="sliderWrapper">
-        <input name="price_min" type="hidden" id="wcb_price_min">
-        <input name="price_max" type="hidden" id="wcb_price_max">
-    <div id="slider-range" data-min="£'.$availablePrices[0].'" data-max="£'.$availablePrices[1].'"></div></div>
+    <div id="slider-range" data-min="£'.$availablePrices[0].'" data-max="£'.$availablePrices[1].'"></div>
+    <div class="sliderWrapper clearfix">
+      <div class="sliderWrapper-labelledInputWrapper clearfix">
+        <div class="labelledInput">
+          <div class="label">
+            min
+          </div>
+          <input type="tel" name="price_min" id="wcb_price_min" placeholder="'.$availablePrices[0].'">
+        </div>
+        <div class="labelledInput">
+          <div class="label">
+            max
+          </div>
+          <input type="tel" name="price_max" id="wcb_price_max" placeholder="'.$availablePrices[1].'">
+        </div>
+      </div>
+    </div>
     <script>
     (function( $ ) {
         wcbSliderInit = function() {
@@ -22,16 +35,16 @@ if (isset($availablePrices[0]) && ( ($availablePrices[0] === 999999 && $availabl
                     values: [ '. $price[0] . ', ' . $price[1] .' ],
                     step: 0.01,
                     slide: function( event, ui ) {
-                        $( "#wcb_price_min" ).val( ui.values[0] );
-                        $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + ui.values[0] );
-                        $( "#wcb_price_max" ).val( ui.values[1] );
-                        $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + ui.values[1] );
+                        $("#wcb_price_min").val( ui.values[0] );
+                        $("input#sliderWrapper-minInput").val(ui.values[0]);
+                        $("#wcb_price_max").val( ui.values[1] );
+                        $("input#sliderWrapper-maxInput").val(ui.values[1]);
                     }
                 });
                 $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
                 $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
-                $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[0]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 0 ) );
-                $($( "span.ui-slider-handle.ui-state-default.ui-corner-all")[1]).attr("data-content", "£" + $( "#slider-range" ).slider( "values", 1 ) );
+                $("input#sliderWrapper-minInput").val($( "#slider-range" ).slider( "values", 0 ) );
+                $("input#sliderWrapper-maxInput").val($( "#slider-range" ).slider( "values", 1 ) );
             });
         };
 

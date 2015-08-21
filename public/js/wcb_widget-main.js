@@ -21,11 +21,8 @@
     $('div.tilesWrapper .tileItem').off();
     wcbHandlers.tiles = $('div.tilesWrapper .tileItem').on("click", function(e) {
       if ( $(e.currentTarget).is('.selected') ) {
-        $(e.currentTarget).attr("data-content", "");
         $(e.currentTarget).removeClass("selected");
       } else {
-        // todo: add a tick code to the line below instead of an 'x'
-        $(e.currentTarget).attr("data-content", "X");
         $(e.currentTarget).addClass("selected");
       };
     });
@@ -35,18 +32,19 @@
       if ( $(e.currentTarget).is('.selected') ) {
         $(e.currentTarget).removeClass("selected");
       } else {
-        // todo: add a tick code to the line below instead of an 'x'
         $(e.currentTarget).addClass("selected");
       };
     });
 
     $('#wcb_form_update_btn').off();
     $('#wcb_form_update_btn').on("click", function () {
+        $('.wcbLoader').show();
         wcb_update_filter(event);
     });
 
     $('#wcb_form_reset_btn').off();
     $('#wcb_form_reset_btn').on("click", function () {
+        $('.wcbLoader').show();
         wcb_clear_filter(event);
     });
 
@@ -55,11 +53,11 @@
   var wcb_clear_filter = function(event) {
     event.preventDefault();
 
-    $('#main').load(window.location.href + ' #main', function(){ 
+    $(wcbGlobals.productContainerSelector).load(window.location.href + ' ' + wcbGlobals.productContainerSelector, function(){
       $('.widget.widget_wcb-filterwidget').load(window.location.href + ' .widget.widget_wcb-filterwidget', function() {
-        console.log("hey");
         setupHandlers();
         wcbSliderInit();
+        $('.wcbLoader').hide();
       });
     });
     return false;
@@ -108,8 +106,12 @@
         workingHref += newQuery;
       }
     }
-    $('#main').load(workingHref + ' #main');
+    console.log("loading: " + workingHref, wcbGlobals.productContainerSelector);
+    $(wcbGlobals.productContainerSelector).load(workingHref + ' ' + wcbGlobals.productContainerSelector, function() {
+      $('.wcbLoader').hide();
+    });
     $('button#wcb_form_reset_btn').attr('disabled', false);
+    $('button#wcb_form_reset_btn').removeClass("disabled");
     return false;
   }
 
