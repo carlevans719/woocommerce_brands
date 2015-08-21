@@ -100,13 +100,28 @@
         newQuery += 'brand['+formData.brand+']';
       }
 
+      /** Custom Attributes **/
+      var attributes = {};
+      $('.customAttributes-wcbCheck:checked').each(function(idx, el) {
+        var attributeType = $(this).attr('data-value'),
+            attributeValue = $(this)[0].id;
+
+        if (!attributes[attributeType]) {
+          attributes[attributeType] = attributeValue;
+        } else {
+          attributes[attributeType] += '_' + attributeValue;
+        }
+      });
+        for (var attrib in attributes) {
+          newQuery += 'attribute[' + attrib + ':' + attributes[attrib] + ']';
+        }
+
       if (workingHref.indexOf('wcb_filter') > -1) {
         workingHref = workingHref.replace(new RegExp(/&?(wcb_filter=).*[&#]?/g), newQuery);
       } else {
         workingHref += newQuery;
       }
     }
-    console.log("loading: " + workingHref, wcbGlobals.productContainerSelector);
     $(wcbGlobals.productContainerSelector).load(workingHref + ' ' + wcbGlobals.productContainerSelector, function() {
       $('.wcbLoader').hide();
     });

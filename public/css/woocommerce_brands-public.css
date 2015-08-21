@@ -434,6 +434,34 @@ button.sui-button--grey.disabled {
     box-shadow: 0 11px 0 0 rgba(162, 162, 162, 0.78);
   }
 }
+
+.customAttributes-attribute {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: right;
+}
+
+.customAttributes-title {
+    padding-bottom: 5px;
+}
+
+.customAttributes-wrapper {
+    margin-bottom: 15px;
+}
+
+.chrome input[type="checkbox"]:hover:before, .safari input[type="checkbox"]:hover:before {
+    color: #e4ded4;
+    content: '' !important;
+    font: 12px/20px sans-serif;
+    height: 0px;
+    top: 0px;
+    letter-spacing: 1px;
+    position: absolute;
+    text-align: center;
+    text-transform: uppercase;
+    width: 0px;
+    left: 0px;
+}
 .clearfix:after {
   content: "";
   display: table;

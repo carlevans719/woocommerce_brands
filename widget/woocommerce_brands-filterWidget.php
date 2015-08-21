@@ -115,7 +115,7 @@ class wcb_FilterWidget extends WP_Widget {
                 if (is_array($attributeValues) && count($attributeValues)) {
                   if (!isset($availableAttributes[$attributeName])) $availableAttributes[$attributeName] = array();
                   foreach ($attributeValues as $attributeValue) {
-                    $attributeValue = $attributeValue->name;
+                    $attributeValue = $attributeValue->slug;
                     if (isset($availableAttributes[$attributeName][$attributeValue])) {
                       $availableAttributes[$attributeName][$attributeValue] = $availableAttributes[$attributeName][$attributeValue] + 1;
                     } else {
@@ -171,7 +171,8 @@ class wcb_FilterWidget extends WP_Widget {
                 $this->instance_params[ 'brand' ][ $i ] = intval( $this->instance_params[ 'brand' ][ $i ] );
             } //$i = 0; $i < count( $this->instance_params[ 'brand' ] ); $i++
         } //isset( $this->instance_params[ 'brand' ] )
-        // logit($this->instance_params);
+
+
         // AAAAND we're done.
     }
     /**
@@ -320,14 +321,14 @@ class wcb_FilterWidget extends WP_Widget {
 ?>
             <fieldset>
               <p class="customAttributes clearfix">
-                <label class="filterLabel" for="<?php echo $this->get_field_id( 'filterBy-brand' );?>">
+                <label class="filterLabel">
                   <?php echo 'Custom Attributes';?>
                 </label>
               </p>
               <div class="customAttributes-container clearfix">
                 <div class="customAttributes-containerInnter clearfix">
                 <select class="customAttributes-select" name="custom_attributes">
-                  <option value=""></option>
+                  <option value="[Please select]"></option>
 <?php
 $extraMarkup = '';
             foreach ($otherAttribs as $key => $value) {
@@ -371,8 +372,8 @@ $extraMarkup = '';
         $instance[ 'filterBy-brand-layout' ] = ( !empty( $new_instance[ 'filterBy-brand-layout' ] ) ) ? strip_tags( $new_instance[ 'filterBy-brand-layout' ] ) : 'tiles';
         $instance[ 'dom-container-selector' ]  = ( isset( $new_instance[ 'dom-container-selector' ] ) ) ? strip_tags( $new_instance[ 'dom-container-selector' ] ) : '';
         $availableCustomAttributes = wcb_get_attributes();
-        foreach ($availableCustomAttributes as $key => $value) {
-          $instance[ 'wcb_ca-'.$key ] = ( isset( $new_instance[ 'wcb_ca-'.$key ] ) ) ? strip_tags( $new_instance[ 'wcb_ca-'.$key ] ) : '';
+        foreach ($new_instance as $key => $value) {
+          if (strrpos($key, 'wcb_ca-') !== false) $instance[$key] = strip_tags($new_instance[$key]);
         }
         return $instance;
     }
@@ -388,7 +389,9 @@ $extraMarkup = '';
         $domSelector = $instance['dom-container-selector'] ? $instance['dom-container-selector'] : '#main';
         $output .= '<div id="oneTimeScript"><script>/* wcb variables */ wcbGlobals = {"productContainerSelector": "'.trim($domSelector).'"}; document.getElementById("oneTimeScript").remove();</script></div>
         <form id="wcb_filterForm" class="wcb_form clearfix">';
+
         if ( is_array( $args ) ) {
+
           if ( in_array( 'priceSlider', $args ) ) {
             if ( wcb_get_html_component( 'slider' ) ) {
               $module_count++;
@@ -415,8 +418,7 @@ $extraMarkup = '';
 
           // custom attributes
           if (count($args['wcb_ca'])) {
-            $output .= $instance['filterBy-customAttributes-title'] ? $instance['filterBy-customAttributes-title'] : '';
-            $output .= wcb_get_html_component( 'generic_checkboxes' );
+            $output .= wcb_get_html_component( 'generic_checkboxes', $instance );
           }
 
         } //is_array( $args )
@@ -449,7 +451,7 @@ if ( !function_exists( 'wcb_get_woocommerce_version' ) ) {
     }
 } //!function_exists('wcb_get_woocommerce_version')
 if ( !function_exists( 'wcb_get_html_component' ) ) {
-    function wcb_get_html_component( $componentName = '' ) {
+    function wcb_get_html_component( $componentName = '', $instance = '' ) {
         $componentHTML = '';
         if ( !$componentHTML && $componentName && file_exists( COMPONENTS_DIR . "{$componentName}.php" ) ) {
             $componentHTML = COMPONENTS_DIR . "{$componentName}.php";
@@ -490,16 +492,17 @@ if ( !function_exists( 'wcb_addFilters' ) ) {
      */
     function wcb_addFilters( $query ) {
         global $wcbFilter;
-        // todo only add filters on the shop pages
         if ( $query->is_main_query() && ( is_shop() || is_product_category() ) ) {
-            $requestedFilters = wcb_sort_queries( $_GET );
-            $params           = $wcbFilter->get_params();
-            $toQuery          = array();
+            $requestedFilters              = wcb_sort_queries( $_GET );
+            $params                        = $wcbFilter->get_params();
+            $toQuery_meta = $toQuery_tax   = array();
+            logit($requestedFilters);
+
             // Price
             if ( $requestedFilters[ 'price' ] ) {
                 $min_price = $params[ 'price' ][ 0 ];
                 $max_price = $params[ 'price' ][ 1 ];
-                $toQuery[] = array(
+                $toQuery_meta[] = array(
                      'key' => '_price',
                     'value' => array(
                          $min_price,
@@ -514,18 +517,45 @@ if ( !function_exists( 'wcb_addFilters' ) ) {
                 $limitBrands = is_array( $params[ 'brand' ] ) ? $params[ 'brand' ] : array(
                      0 => $params[ 'brand' ]
                 );
-                $toQuery[]   = array(
+                $toQuery_meta[]   = array(
                      'key' => 'wcb_brand',
                     'value' => $limitBrands,
                     'type' => 'NUMERIC',
                     'compare' => "IN"
                 );
             } //$requestedFilters[ 'brand' ]
-            if ( count( $toQuery ) )
-                set_query_var( 'meta_query', $toQuery );
+            if ( count( $toQuery_meta ) )
+                set_query_var( 'meta_query', $toQuery_meta );
+
+            if ( $requestedFilters[ 'attribute'] ) {
+              $toQuery_tax = array();
+              foreach($requestedFilters['attribute'] as $key => $value) {
+                $toQuery_tax[] = array(
+                 'taxonomy' => $key,
+                 'field' => 'slug',
+                 'terms' => $value,
+                  'operator' => 'IN'
+                );
+                $toQuery_tax[] = array(
+                  'taxonomy' => $key,
+                  'field' => 'slug',
+                  'terms' => $value,
+                  'operator' => 'IN',
+                  'include_children' => 0
+                );
+              }
+              $toQuery_tax['relation'] = 'OR';
+            }
+
+            if ( count( $toQuery_tax ) )
+                set_query_var( 'tax_query', $toQuery_tax );
+
+
         } //$query->is_main_query()
     }
 } //!function_exists('wcb_addFilters')
+
+
 if ( !function_exists( 'wcb_get_attributes' ) ) {
     /**
      * Get all possible woocommerce attribute taxonomies
@@ -570,9 +600,38 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
                     // Pop the values off the GET query
                     $strGet  = substr( $strGet, 0, $start );
                     // Deal with multiple values (if applicable)
-                    if ( strrpos( $strVals, '_' ) > 0 ) {
+                    if ( strrpos( $strVals, ':' ) > 0) {
+                      $arrVals = explode( ':', $strVals);
+                      // $arrVals[0] is the attribute name,
+                      // the rest are values
+                      $tmpArr = array();
+                      // TODO: maybe think about a way to put multiple :'s in one [section]
+                      // second, are there any _s
+                      if ( strrpos( $arrVals[1], '_') > 0) {
+                        $tmpArr[$arrVals[0]] = explode( '_', $arrVals[1] );
+                      } else {
+                        $tmpArr[$arrVals[0]] = array(
+                          0 => $arrVals[1]
+                        );
+                      }
+                      $arrVals = $tmpArr;
+
+                      /*
+                      now we have $arrVals which look like this:
+                      array(
+                        pa_speed => array(
+                          0 => "1mph",
+                          1 => "2mph",
+                          [...]
+                        )
+                      )
+
+                      */
+                    } else {
+                      if ( strrpos( $strVals, '_' ) > 0 ) {
                         $arrVals = explode( '_', $strVals );
-                    } //strrpos($strVals, '_') > 0
+                      } //strrpos($strVals, '_') > 0
+                    }
                     // Get the type of filter the values apply to (called $filterType)
                     $start = strrpos( $strGet, $delimeters[ 1 ] );
                     if ( !$start ) {
@@ -585,14 +644,24 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
                     $strGet     = $strGet ? substr( $strGet, 0, $start == 0 ? strlen( $strGet ) : $start + 1 ) : $strGet;
                     // If there are multiple values, create a nested array
                     if ( $arrVals ) {
-                        $arrOut[ $filterType ] = array();
-                        // Put the values into the nested array
-                        $arrVals               = preg_replace( '/-/', ' ', $arrVals );
-                        for ( $i = 0; $i < count( $arrVals ); $i++ ) {
-                            $arrOut[ $filterType ][ $i ] = $arrVals[ $i ];
-                        } //$i = 0; $i < count($arrVals); $i++
-                        // Otherwise just add the value to the list, under a key called the filter type
+                        array_walk_recursive($arrVals,
+                          function(&$v) {
+                            preg_replace( '/-/', ' ', $v );
+                          }
+                        );
+                        if (!isset($arrOut[ $filterType ])) {
+                          // Put the values into the nested array
+                          $arrOut[$filterType] = array();
+                          foreach ($arrVals as $key => $value) {
+                            $arrOut[$filterType][$key] = $value;
+                          }
+                        } else {
+                          foreach ($arrVals as $key => $value) {
+                            $arrOut[$filterType][$key] = $value;
+                          }
+                        }
                     } //$arrVals
+                    // Otherwise just add the value to the list, under a key called the filter type
                     else {
                         if ( strrpos( $strVals, '-' ) > 0 ) {
                             $strVals = preg_replace( '/-/', ' ', $strVals );
