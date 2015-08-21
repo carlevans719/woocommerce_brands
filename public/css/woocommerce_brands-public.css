@@ -314,7 +314,7 @@ button.sui-button--grey.disabled {
 }
 .labelledInput {
   display: inline-flex;
-  width: 100px;
+  width: 125px;
   max-width: 100%;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -336,6 +336,7 @@ button.sui-button--grey.disabled {
   height: 38px;
   line-height: 14px;
   margin: 0px;
+  margin-left: 22px;
   padding: 11px 6px;
   text-align: center;
   transition-delay: 0s;
@@ -365,7 +366,7 @@ button.sui-button--grey.disabled {
   height: 38px;
   line-height: 16.99880027771px;
   margin: 0px;
-  margin-right: 10px;
+  /*margin-right: 10px;*/
   max-width: 100%;
   padding: 7px 5px;
   transition-delay: 0s, 0s, 0s;

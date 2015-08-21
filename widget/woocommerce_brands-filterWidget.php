@@ -87,7 +87,7 @@ class wcb_FilterWidget extends WP_Widget {
             $this->instance_params[ 'tax_query' ] = $toQuery;
           } //$cat
         // Declare vars
-        $availablePrices = $availableBrands = $activeFilters = array();
+        $availablePrices = $availableBrands = $activeFilters = $availableAttributes = array();
         $loop            = $min_price = $max_price = $brandId = '';
         // Setup loop
         $loop            = new WP_Query( $this->instance_params );
@@ -107,57 +107,28 @@ class wcb_FilterWidget extends WP_Widget {
             if (get_post_meta(get_the_ID(), '_price')[0] > $max_price) $max_price = get_post_meta(get_the_ID(), '_price')[0];
             if ( (0 < get_post_meta(get_the_ID(), '_price')[0]) && (get_post_meta(get_the_ID(), '_price')[0] < $min_price) ) $min_price = get_post_meta(get_the_ID(), '_price')[0];
 
-
-            $customAttributes = get_post_meta(get_the_ID(), '_product_attributes')[0];
-            if ($customAttributes) {
-              foreach ($customAttributes as $attribute) {
-                logit(taxonomy_exists($attribute['name']));
-                $attributeTerms = get_terms( wc_attribute_taxonomy_name($attribute['name']), 'orderby=name&hide_empty=0' );
-                // if ( ( $customAttributes[$i] ) && ( !isset($availableAttributes[$customAttributes[$i]]) ) {
-                //   $availableAttributes[$customAttributes[$i]] = $attributeTerms;
-                // } else {
-                //   for ($j=0; $j < count($attributeTerms); $j++) {
-                //
-                //   }
-                // }
-                // !array_search( $customAttributes[$i], $availableAttributes ) ) ) {
-                // logit("attributeTerms are: ");
-                // logit($attributeTerms);
-
-                // logit("attribute is: ");
-                // logit($attribut/e);
-
-                // logit("customAttributes are: ");
-                // logit($customAttributes);
-
-                // logit("availableAttributes are: ");
-                // logit($availableAttributes);
+            // custom attributes
+            $attributes = $product->get_attributes();
+            if (is_array($attributes) && count($attributes)) {
+              foreach ($attributes as $attributeName => $attributeInfo) {
+                $attributeValues = get_the_terms(get_the_ID(), $attributeName);
+                if (is_array($attributeValues) && count($attributeValues)) {
+                  if (!isset($availableAttributes[$attributeName])) $availableAttributes[$attributeName] = array();
+                  foreach ($attributeValues as $attributeValue) {
+                    $attributeValue = $attributeValue->name;
+                    if (isset($availableAttributes[$attributeName][$attributeValue])) {
+                      $availableAttributes[$attributeName][$attributeValue] = $availableAttributes[$attributeName][$attributeValue] + 1;
+                    } else {
+                      $availableAttributes[$attributeName][$attributeValue] = 1;
+                    }
+                  }
                 }
-                    // $availableAttributes[ $customAttributes[$i] ] = isset( $availableAttributes[ $customAttributes[$i] ] ) ? $availableAttributes[ $customAttributes[$i] ] + 1 : 1;
-                    // Above says that if the term exists in the array of found terms, increase its value by 1, otherwise set it to one.
-                    // We need to actually determine if the term exists AS AN ARRAY in the array of found terms.
-                    // If it does - we need to determine this product's values and whether those are in the inner array, adding them if not.
 
-                    /*
-                    i.e.
-                    $customAttributes = array(
-                      0 => 'pa_speed',
-                      1 => 'pa_color'
-                    );
-                    $availableAttributes = array(
-                      'pa_speed' => array(
-                        '2mph' => 3,
-                        '1mph' => 1
-                      )
-                    )
-
-
-
-                    */
               }
-            // }
+            }
         // End of loop
         endwhile;
+
         // Set the available brands to those found
         $this->instance_params[ 'availableBrands' ] = $availableBrands;
 
@@ -224,11 +195,9 @@ class wcb_FilterWidget extends WP_Widget {
                 $params[] = $instance[ 'filterBy-brand-layout' ] == 'tiles' ? 'brandsTiles' : 'brandsChecklist';
 
             // custom attributes
-            $customAttributes = wcb_get_attributes();
             $params['wcb_ca'] = array();
-
-            foreach ($customAttributes as $key => $value) {
-              if (strrpos($key, 'wcb_ca-') === 0) $params['wcb_ca'][] = substr($key, 7);
+            foreach ($instance as $key => $value) {
+              if (strrpos($key, 'wcb_ca-') !== false) $params['wcb_ca'][] = substr($key, 7, strlen($key));
             };
             echo self::get_widget_html( $params, $instance );
             echo $args[ 'after_widget' ];
@@ -448,7 +417,6 @@ $extraMarkup = '';
           if (count($args['wcb_ca'])) {
             $output .= $instance['filterBy-customAttributes-title'] ? $instance['filterBy-customAttributes-title'] : '';
             $output .= wcb_get_html_component( 'generic_checkboxes' );
-            // logit(wcb_get_html_component( 'generic_checkboxes' ));
           }
 
         } //is_array( $args )
@@ -637,12 +605,19 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
         return $arrOut;
     }
 } //!function_exists("wcb_sort_queries")
+
+
+
+
+
+
+
+
+
 add_action( 'widgets_init', create_function( '', 'return register_widget("wcb_FilterWidget");' ) );
-add_action( 'registered_taxonomy', 'runWidget' );
+add_action( 'wp_loaded', 'runWidget' );
 add_action( 'pre_get_posts', 'wcb_addFilters' );
-function runWidget( $taxonomy ) {
-    if ( $taxonomy === 'product_cat' ) {
-        global $wcbFilter;
-        $wcbFilter = new wcb_FilterWidget();
-    } //$taxonomy === 'product_cat'
+  function runWidget( $taxonomy ) {
+  global $wcbFilter;
+  $wcbFilter = new wcb_FilterWidget();
 }
