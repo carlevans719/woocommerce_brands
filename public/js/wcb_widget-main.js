@@ -17,6 +17,37 @@
     return o;
   };
 
+  wcbSliderInit = function() {
+
+    if (!wcbGlobals) wcbGlobals = {};
+    wcbGlobals.wcbSlider = {
+      cMin: parseFloat($("#sliderInitVals").data("min")),
+      cMax: parseFloat($("#sliderInitVals").data("max")),
+      aMin: parseFloat($("#slider-range").data("min")),
+      aMax: parseFloat($("#slider-range").data("max")),
+    };
+
+    $(function() {
+      $( "#slider-range" ).slider({
+        range: true,
+        min: wcbGlobals.wcbSlider.aMin,
+        max: wcbGlobals.wcbSlider.aMax,
+        values: [ wcbGlobals.wcbSlider.cMin, wcbGlobals.wcbSlider.cMax ],
+        step: 0.01,
+        slide: function( event, ui ) {
+          $("#wcb_price_min").val( ui.values[0] );
+          $("input#sliderWrapper-minInput").val(ui.values[0]);
+          $("#wcb_price_max").val( ui.values[1] );
+          $("input#sliderWrapper-maxInput").val(ui.values[1]);
+        }
+      });
+      $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
+      $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
+      $("input#sliderWrapper-minInput").val($( "#slider-range" ).slider( "values", 0 ) );
+      $("input#sliderWrapper-maxInput").val($( "#slider-range" ).slider( "values", 1 ) );
+    });
+  };
+
   setupHandlers = function() {
     $('div.tilesWrapper .tileItem').off();
     wcbHandlers.tiles = $('div.tilesWrapper .tileItem').on("click", function(e) {
@@ -35,6 +66,21 @@
         $(e.currentTarget).addClass("selected");
       };
     });
+console.log("Setting up the handler 1");
+    $('input[name="price_min"]').off();
+    $('input[name="price_min"]').on('change', function(e) {
+      var newVal = $(this).val();
+      console.log(newVal, isFinite(newVal));
+      if (isFinite(newVal)) $('#slider-range').slider({values: [newVal, $('input[name="price_max"]').val()]})
+    });
+console.log("Setting up the handler 2");
+    $('input[name="price_max"]').off();
+    $('input[name="price_max"]').on('change', function(e) {
+      var newVal = $(this).val();
+      console.log(newVal, isFinite(newVal));
+      if (isFinite(newVal)) $('#slider-range').slider({values: [$('input[name="price_min"]').val(), newVal]})
+    });
+
 
     $('#wcb_form_update_btn').off();
     $('#wcb_form_update_btn').on("click", function () {
@@ -131,4 +177,5 @@
   }
 
   setupHandlers();
+  wcbSliderInit()
 })( jQuery );

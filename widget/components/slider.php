@@ -7,48 +7,22 @@ if (isset($availablePrices[0]) && ( ($availablePrices[0] === 999999 && $availabl
     $componentMarkup = '';
 } else {
     $componentMarkup = '
-    <div id="slider-range" data-min="£'.$availablePrices[0].'" data-max="£'.$availablePrices[1].'"></div>
+    <div id="slider-range" data-min="'.$availablePrices[0].'" data-max="'.$availablePrices[1].'"></div>
+    <div id="sliderInitVals" data-min="'.$price[0].'" data-max="'.$price[1].'"></div>
     <div class="sliderWrapper clearfix">
       <div class="sliderWrapper-labelledInputWrapper clearfix">
         <div class="labelledInput">
-          <div class="label">
+          <div class="label" unselectable="on" onselectstart="return false;" onmousedown="return false;">
             min
           </div>
-          <input type="tel" name="price_min" id="wcb_price_min" placeholder="'.$availablePrices[0].'">
+          <input type="number" max="'.$availablePrices[1].'" min="'.$availablePrices[0].'" step="0.01" name="price_min" id="wcb_price_min" value="'.$availablePrices[0].'" placeholder="'.$availablePrices[0].'">
         </div>
         <div class="labelledInput">
-          <div class="label">
+          <div class="label" unselectable="on" onselectstart="return false;" onmousedown="return false;">
             max
           </div>
-          <input type="tel" name="price_max" id="wcb_price_max" placeholder="'.$availablePrices[1].'">
+          <input type="number" max="'.$availablePrices[1].'" min="'.$availablePrices[0].'" step="0.01" name="price_max" id="wcb_price_max" value="'.$availablePrices[1].'" placeholder="'.$availablePrices[1].'">
         </div>
       </div>
-    </div>
-    <script>
-    (function( $ ) {
-        wcbSliderInit = function() {
-            $(function() {
-                $( "#slider-range" ).slider({
-                    range: true,
-                    min: '. $availablePrices[0] .',
-                    max: '. $availablePrices[1] .',
-                    values: [ '. $price[0] . ', ' . $price[1] .' ],
-                    step: 0.01,
-                    slide: function( event, ui ) {
-                        $("#wcb_price_min").val( ui.values[0] );
-                        $("input#sliderWrapper-minInput").val(ui.values[0]);
-                        $("#wcb_price_max").val( ui.values[1] );
-                        $("input#sliderWrapper-maxInput").val(ui.values[1]);
-                    }
-                });
-                $( "#wcb_price_min" ).val( $( "#slider-range" ).slider( "values", 0 ) );
-                $( "#wcb_price_max" ).val( $( "#slider-range" ).slider( "values", 1 ) );
-                $("input#sliderWrapper-minInput").val($( "#slider-range" ).slider( "values", 0 ) );
-                $("input#sliderWrapper-maxInput").val($( "#slider-range" ).slider( "values", 1 ) );
-            });
-        };
-
-        wcbSliderInit();
-    })( jQuery );
-    </script>';
+    </div>';
 };

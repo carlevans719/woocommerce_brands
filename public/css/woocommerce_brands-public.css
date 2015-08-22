@@ -1,134 +1,8 @@
-.loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
+.wcb_form {
+  max-width: 900px;
 }
 
-.loading i {
-  position: absolute;
-  top: 24px; left: 24px;
-  display: block;
-  width: 24px;
-  height: 24px;
-  background: #799ED2;
-  border-radius: 24px;
-  -webkit-animation: spin2 1.5s ease-in-out infinite;
-}
-.loading i:first-child {
-  top: -24px; left: 0;
-  background: #194685;
-  -webkit-animation: spin 1.5s ease-in-out infinite;
-}
-.loading i:last-child {
-  top: 24px; left: -24px;
-  background: #C7202C;
-  -webkit-animation: spin3 1.5s ease-in-out infinite;
-}
-
-@-webkit-keyframes spin {
-  0% {
-    top: -24px;
-    left: 0;
-    -webkit-transform: scale(1);
-  }
-  17% {
-    -webkit-transform: scale(.5);
-  }
-  33% {
-    top: 24px;
-    left: 24px;
-    -webkit-transform: scale(1);
-  }
-  50% {
-    -webkit-transform: scale(.5);
-  }
-  66% {
-    top: 24px;
-    left: -24px;
-    -webkit-transform: scale(1);
-  }
-  83% {
-    -webkit-transform: scale(.5);
-  }
-  100% {
-    top: -24px;
-    left: 0;
-    -webkit-transform: scale(1);
-  }
-}
-@-webkit-keyframes spin2 {
-  0% {
-    top: 24px;
-    left: 24px;
-    -webkit-transform: scale(1);
-  }
-  17% {
-    -webkit-transform: scale(.5);
-  }
-  33% {
-    top: 24px;
-    left: -24px;
-    -webkit-transform: scale(1);
-  }
-  50% {
-    -webkit-transform: scale(.5);
-  }
-  66% {
-    top: -24px;
-    left: 0;
-    -webkit-transform: scale(1);
-  }
-  83% {
-    -webkit-transform: scale(.5);
-  }
-  100% {
-    top: 24px;
-    left: 24px;
-    -webkit-transform: scale(1);
-  }
-}
-@-webkit-keyframes spin3 {
-  0% {
-    top: 24px;
-    left: -24px;
-    -webkit-transform: scale(1);
-  }
-  17% {
-    -webkit-transform: scale(.5);
-  }
-  33% {
-    top: -24px;
-    left: 0;
-    -webkit-transform: scale(1);
-  }
-  50% {
-    -webkit-transform: scale(.5);
-  }
-  66% {
-    top: 24px;
-    left: 24px;
-    -webkit-transform: scale(1);
-  }
-  83% {
-    -webkit-transform: scale(.5);
-  }
-  100% {
-    top: 24px;
-    left: -24px;
-    -webkit-transform: scale(1);
-  }
-}}
-
-
-
-.wcb_form:before {
-  clear: both;
-}
-
-.wcb_form:after {
+.wcb_form:after, .wcb_form:before {
   clear: both;
 }
 
@@ -154,7 +28,7 @@ div#slider-range:before {
     position: absolute;
     top: -25px;
     left: -10px;
-    content: attr(data-min);
+    content: "£" attr(data-min);
     font-style: italic;
     font-size: 0.8em;
 }
@@ -163,7 +37,7 @@ div#slider-range:after {
     position: absolute;
     top: -25px;
     right: -5px;
-    content: attr(data-max);
+    content: "£" attr(data-max);
     font-style: italic;
     font-size: 0.8em;
 }
@@ -187,6 +61,7 @@ div#slider-range {
 
 .sliderWrapper {
     display: block;
+    margin-bottom: 30px;
 }
 
 /* BRAND TILES */
@@ -206,16 +81,12 @@ li.tileItem.selected div.selectedOverlay {
   background-color: rgba(0, 0, 0, .5);
 }
 
-.sliderWrapper {
-  margin-top: 20px;
-}
-
 .tilesWrapper {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .wcb_form .tilesWrapper-tileList {
-  margin-bottom: 40px !important;
+  text-align: right;
 }
 
 .tileThumb-container {
@@ -234,7 +105,7 @@ li.tileItem.selected div.selectedOverlay {
 }
 
 .tileCaption-container {
-  width: 87px;
+  width: 90px;
   max-width: 100%;
   left: 0;
   margin: 0 auto;
@@ -250,21 +121,22 @@ li.tileItem.selected div.selectedOverlay {
     text-align: center;
     font-size: 11pt;
     font-weight: 900;
-    background-color: #ccc;
 }
 
 
 .tilesWrapper .tileItem {
   position: relative;
   padding: 10px;
-  float: left;
   cursor: pointer;
+  display: inline-flex;
+  margin-bottom: 30px;
+
 }
 
 
 button.sui-button--grey {
   background-color: transparent;
-  box-shadow: 0 0 0 1px rgba(34,36,38,.15) inset!important;
+  box-shadow: 0 0 0 1px rgba(34,36,38,.45) inset!important;
   background: 0 0!important;
   color: rgba(0,0,0,.45)!important;
   font-weight: 400;
@@ -311,20 +183,21 @@ button.sui-button--grey.disabled {
 
 .sliderWrapper-labelledInputWrapper {
   margin-top: 20px;
+  text-align: right;
 }
 .labelledInput {
   display: inline-flex;
-  width: 125px;
+  width: 135px;
   max-width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  float: right;
+  margin: 5px;
 }
 
 .labelledInput .label {
   background-color: rgb(232, 232, 232);
-  border-color: rgb(232, 232, 232);
+  border-color: rgb(182, 182, 182);
   border-radius: 4px 0 0 4px;
+  border-width: 1px;
+  border-style: solid;
   box-sizing: border-box;
   color: rgba(0, 0, 0, 0.6);
   flex-basis: auto;
@@ -336,7 +209,6 @@ button.sui-button--grey.disabled {
   height: 38px;
   line-height: 14px;
   margin: 0px;
-  margin-left: 22px;
   padding: 11px 6px;
   text-align: center;
   transition-delay: 0s;
@@ -345,12 +217,18 @@ button.sui-button--grey.disabled {
   transition-timing-function: ease;
   white-space: nowrap;
   width: 35px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select:none;
+  user-select:none;
+  -o-user-select:none;
+  cursor: default;
 }
 
 .labelledInput input {
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   -webkit-user-select: text;
-  border-color: rgba(34, 36, 38, 0.14902);
+  border-color: rgba(182, 182, 182, 1);
   border-radius: 0 4px 4px 0;
   border-style: solid;
   border-width: 1px;
@@ -366,14 +244,13 @@ button.sui-button--grey.disabled {
   height: 38px;
   line-height: 16.99880027771px;
   margin: 0px;
-  /*margin-right: 10px;*/
   max-width: 100%;
   padding: 7px 5px;
   transition-delay: 0s, 0s, 0s;
   transition-duration: 0.1s, 0.1s, 0.1s;
   transition-property: background-color, box-shadow, border-color;
   transition-timing-function: ease, ease, ease;
-  width: 70px;
+  width: 100px;
 }
 .wcbLoader:before,
 .wcbLoader:after,
@@ -447,6 +324,14 @@ button.sui-button--grey.disabled {
 
 .customAttributes-wrapper {
     margin-bottom: 15px;
+}
+
+.customAttributes-attributeValue label {
+  text-transform: capitalize;
+}
+
+.wcb_form-buttonWrapper {
+  text-align: right;
 }
 
 .chrome input[type="checkbox"]:hover:before, .safari input[type="checkbox"]:hover:before {

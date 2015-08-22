@@ -423,7 +423,7 @@ $extraMarkup = '';
 
         } //is_array( $args )
         if ( $module_count > 0 ) {
-            $output .= '<button id="wcb_form_update_btn" class="sui-button--grey"><div class="wcbLoader" style="display: none;"></div>Update</button><button id="wcb_form_reset_btn" class="sui-button--grey disabled" disabled>Reset</button>';
+            $output .= '<div class="wcb_form-buttonWrapper"><button id="wcb_form_reset_btn" class="sui-button--grey disabled" disabled>Reset</button><button id="wcb_form_update_btn" class="sui-button--grey"><div class="wcbLoader" style="display: none;"></div>Update</button></div>';
         } //$module_count > 0
         $output .= '</form>';
         return $output;
