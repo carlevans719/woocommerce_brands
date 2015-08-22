@@ -1,5 +1,6 @@
 .wcb_form {
-  max-width: 900px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .wcb_form:after, .wcb_form:before {
@@ -18,6 +19,7 @@
 /* PRICE SLIDER */
 div#slider-range {
     margin: 20px 0;
+    margin-top: 35px;
 }
 
 .ui-slider-range.ui-widget-header.ui-corner-all {

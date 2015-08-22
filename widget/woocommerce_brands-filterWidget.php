@@ -151,8 +151,8 @@ class wcb_FilterWidget extends WP_Widget {
         if ( ( array_search( 'price', $activeFilters ) === false ) || ( !isset( $this->instance_params[ 'price' ] ) ) || ( $this->instance_params[ 'price' ][ 0 ] > $this->instance_params[ 'price' ][ 1 ] ) ) {
             // If we aren't filtering by price (or if the requested filter is invalid) then set the price limits to the min/max
             $this->instance_params[ 'price' ] = array(
-                 0 => $min_price,
-                1 => $max_price
+              0 => $min_price,
+              1 => $max_price
             );
         } //( array_search( 'price', $activeFilters ) === false ) || ( !isset( $this->instance_params[ 'price' ] ) ) || ( $this->instance_params[ 'price' ][ 0 ] > $this->instance_params[ 'price' ][ 1 ] )
         else {
@@ -386,8 +386,10 @@ $extraMarkup = '';
         wp_enqueue_style( 'frontendMain-css' );
         wp_register_script( 'frontendMain-js', PLUGIN_URI . 'woocommerce-brands/public/js/jquery-ui.js' );
         wp_enqueue_script( 'frontendMain-js' );
+        $themeName = strtolower(wp_get_theme()->name);
+        $virtueOutput = ($themeName === 'virtue') ? ', "isVirtue" : true' : ', "isVirtue" : false';
         $domSelector = $instance['dom-container-selector'] ? $instance['dom-container-selector'] : '#main';
-        $output .= '<div id="oneTimeScript"><script>/* wcb variables */ wcbGlobals = {"productContainerSelector": "'.trim($domSelector).'"}; document.getElementById("oneTimeScript").remove();</script></div>
+        $output .= '<div id="oneTimeScript"><script>/* wcb variables */ wcbGlobals = {"productContainerSelector": "'.trim($domSelector).'"'.$virtueOutput.'}; document.getElementById("oneTimeScript").remove();</script></div>
         <form id="wcb_filterForm" class="wcb_form clearfix">';
 
         if ( is_array( $args ) ) {

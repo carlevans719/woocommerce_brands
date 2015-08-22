@@ -17,9 +17,26 @@
     return o;
   };
 
+  initMasonryWall = function() {
+    jQuery('.init-masonry').each(function(){
+      var masonrycontainer = jQuery(this),
+      masonry_selector = jQuery(this).data('masonry-selector');
+      masonrycontainer.imagesLoadedn( function(){
+        masonrycontainer.masonry({itemSelector: masonry_selector});
+      });
+    });
+    jQuery('.kt-masonry-init').each(function(){
+      var masonrycontainer = jQuery(this),
+      masonry_selector = jQuery(this).data('masonry-selector');
+      masonrycontainer.imagesLoadedn( function(){
+        masonrycontainer.masonry({itemSelector: masonry_selector});
+      });
+    });
+  };
+
   wcbSliderInit = function() {
-    if (!wcbGlobals) {
-      wcbGlobals = {};
+    if (!wcbGlobals) wcbGlobals = {};
+    if (!wcbGlobals.wcbSlider) {
       wcbGlobals.wcbSlider = {
         cMin: parseFloat($("#sliderInitVals").data("min")),
         cMax: parseFloat($("#sliderInitVals").data("max")),
@@ -109,15 +126,16 @@ if (wcbGlobals.isDebugMode) console.log("Setting up the handler for the update b
 if (wcbGlobals.isDebugMode) console.log("Running wcb_clear_filter()");
     event.preventDefault();
 
-  	wcbGlobals.wcbSlider.cMin = formData.price_min;
-  	wcbGlobals.wcbSlider.cMax = formData.price_max;
+  	wcbGlobals.wcbSlider.cMin = parseFloat($("#sliderInitVals").data("min"));
+  	wcbGlobals.wcbSlider.cMax = parseFloat($("#sliderInitVals").data("max"));
 
-    $(wcbGlobals.productContainerSelector).load(window.location.href + ' ' + wcbGlobals.productContainerSelector, function(){
+    $(wcbGlobals.productContainerSelector).load(window.location.href + ' ' + wcbGlobals.productContainerSelector + ' > *', function(){
 if (wcbGlobals.isDebugMode) console.log("AJAX request complete for the products!");
-      $('.widget.widget_wcb-filterwidget').load(window.location.href + ' .widget.widget_wcb-filterwidget', function() {
+      $('.widget.widget_wcb-filterwidget').load(window.location.href + ' .widget.widget_wcb-filterwidget > *', function() {
 if (wcbGlobals.isDebugMode) console.log("AJAX request complete for the widget!");
         setupHandlers();
         wcbSliderInit();
+        if (wcbGlobals.isVirtue) initMasonryWall();
         $('.wcbLoader').hide();
       });
     });
@@ -190,10 +208,11 @@ if (wcbGlobals.isDebugMode) console.log("Running wcb_update_filter()");
     }
 
 if (wcbGlobals.isDebugMode) console.log("Making a request to: '" + workingHref + "'");
-    $(wcbGlobals.productContainerSelector).load(workingHref + ' ' + wcbGlobals.productContainerSelector, function() {
+    $(wcbGlobals.productContainerSelector).load(workingHref + ' ' + wcbGlobals.productContainerSelector + ' > *', function() {
 if (wcbGlobals.isDebugMode) console.log("AJAX request complete for products!");
       setupHandlers();
       wcbSliderInit();
+      if (wcbGlobals.isVirtue) initMasonryWall();
       $('.wcbLoader').hide();
     });
     $('button#wcb_form_reset_btn').attr('disabled', false);
@@ -203,5 +222,6 @@ if (wcbGlobals.isDebugMode) console.log("AJAX request complete for products!");
   }
 
   setupHandlers();
-  wcbSliderInit()
+  wcbSliderInit();
+
 })( jQuery );
