@@ -18,14 +18,17 @@
   };
 
   wcbSliderInit = function() {
-
-    if (!wcbGlobals) wcbGlobals = {};
-    wcbGlobals.wcbSlider = {
-      cMin: parseFloat($("#sliderInitVals").data("min")),
-      cMax: parseFloat($("#sliderInitVals").data("max")),
-      aMin: parseFloat($("#slider-range").data("min")),
-      aMax: parseFloat($("#slider-range").data("max")),
+    if (!wcbGlobals) {
+      wcbGlobals = {};
+      wcbGlobals.wcbSlider = {
+        cMin: parseFloat($("#sliderInitVals").data("min")),
+        cMax: parseFloat($("#sliderInitVals").data("max")),
+        aMin: parseFloat($("#slider-range").data("min")),
+        aMax: parseFloat($("#slider-range").data("max")),
+      };
     };
+
+if (wcbGlobals.isDebugMode) console.log("Running wcbSliderInit()");
 
     $(function() {
       $( "#slider-range" ).slider({
@@ -49,6 +52,8 @@
   };
 
   setupHandlers = function() {
+
+if (wcbGlobals.isDebugMode) console.log("Running setupHandlers()");
     $('div.tilesWrapper .tileItem').off();
     wcbHandlers.tiles = $('div.tilesWrapper .tileItem').on("click", function(e) {
       if ( $(e.currentTarget).is('.selected') ) {
@@ -58,6 +63,7 @@
       };
     });
 
+if (wcbGlobals.isDebugMode) console.log("Setting up the handler for the brand");
     $('.brandCheck-checkboxWrapper .brandCheck-checkbox').off();
     wcbHandlers.checks = $('.brandCheck-checkboxWrapper .brandCheck-checkbox').on("click", function(e){
       if ( $(e.currentTarget).is('.selected') ) {
@@ -66,14 +72,16 @@
         $(e.currentTarget).addClass("selected");
       };
     });
-console.log("Setting up the handler 1");
+
+if (wcbGlobals.isDebugMode) console.log("Setting up the handler for the min price input");
     $('input[name="price_min"]').off();
     $('input[name="price_min"]').on('change', function(e) {
       var newVal = $(this).val();
       console.log(newVal, isFinite(newVal));
       if (isFinite(newVal)) $('#slider-range').slider({values: [newVal, $('input[name="price_max"]').val()]})
     });
-console.log("Setting up the handler 2");
+
+if (wcbGlobals.isDebugMode) console.log("Setting up the handler for the max price input");
     $('input[name="price_max"]').off();
     $('input[name="price_max"]').on('change', function(e) {
       var newVal = $(this).val();
@@ -81,13 +89,14 @@ console.log("Setting up the handler 2");
       if (isFinite(newVal)) $('#slider-range').slider({values: [$('input[name="price_min"]').val(), newVal]})
     });
 
-
+if (wcbGlobals.isDebugMode) console.log("Setting up the handler for the update button");
     $('#wcb_form_update_btn').off();
     $('#wcb_form_update_btn').on("click", function () {
         $('.wcbLoader').show();
         wcb_update_filter(event);
     });
 
+if (wcbGlobals.isDebugMode) console.log("Setting up the handler for the update button");
     $('#wcb_form_reset_btn').off();
     $('#wcb_form_reset_btn').on("click", function () {
         $('.wcbLoader').show();
@@ -97,10 +106,16 @@ console.log("Setting up the handler 2");
   };
 
   var wcb_clear_filter = function(event) {
+if (wcbGlobals.isDebugMode) console.log("Running wcb_clear_filter()");
     event.preventDefault();
 
+  	wcbGlobals.wcbSlider.cMin = formData.price_min;
+  	wcbGlobals.wcbSlider.cMax = formData.price_max;
+
     $(wcbGlobals.productContainerSelector).load(window.location.href + ' ' + wcbGlobals.productContainerSelector, function(){
+if (wcbGlobals.isDebugMode) console.log("AJAX request complete for the products!");
       $('.widget.widget_wcb-filterwidget').load(window.location.href + ' .widget.widget_wcb-filterwidget', function() {
+if (wcbGlobals.isDebugMode) console.log("AJAX request complete for the widget!");
         setupHandlers();
         wcbSliderInit();
         $('.wcbLoader').hide();
@@ -110,6 +125,7 @@ console.log("Setting up the handler 2");
   };
 
   var wcb_update_filter = function(event) {
+if (wcbGlobals.isDebugMode) console.log("Running wcb_update_filter()");
     event.preventDefault();
 
     var newQuery = window.location.href.indexOf('?') > -1 ? '&wcb_filter=' : '?wcb_filter=',
@@ -130,13 +146,17 @@ console.log("Setting up the handler 2");
 
       /** PRICE **/
       if (formData.price_min && formData.price_max) {
+        wcbGlobals.wcbSlider.cMin = formData.price_min;
+        wcbGlobals.wcbSlider.cMax = formData.price_max;
         formData.price_min = parseFloat(formData.price_min);
         formData.price_max = parseFloat(formData.price_max);
         newQuery += 'price[' + formData.price_min.toFixed(2) + '_' + formData.price_max.toFixed(2) + ']';
       } else if (formData.price_min && !formData.price_max) {
+        wcbGlobals.wcbSlider.cMin = formData.price_min;
         formData.price_min = parseFloat(formData.price_min);
         newQuery += 'price[' + formData.price_min.toFixed(2) + ']';
       } else if (!formData.price_min && formData.price_max) {
+        wcbGlobals.wcbSlider.cMax = formData.price_max;
         formData.price_max = parseFloat(formData.price_max);
         newQuery += 'price[0.00_' + formData.price_max.toFixed(2) + ']';
       }
@@ -168,11 +188,17 @@ console.log("Setting up the handler 2");
         workingHref += newQuery;
       }
     }
+
+if (wcbGlobals.isDebugMode) console.log("Making a request to: '" + workingHref + "'");
     $(wcbGlobals.productContainerSelector).load(workingHref + ' ' + wcbGlobals.productContainerSelector, function() {
+if (wcbGlobals.isDebugMode) console.log("AJAX request complete for products!");
+      setupHandlers();
+      wcbSliderInit();
       $('.wcbLoader').hide();
     });
     $('button#wcb_form_reset_btn').attr('disabled', false);
     $('button#wcb_form_reset_btn').removeClass("disabled");
+
     return false;
   }
 

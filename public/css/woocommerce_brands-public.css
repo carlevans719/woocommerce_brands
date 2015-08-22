@@ -165,7 +165,6 @@ button.sui-button--grey {
   -webkit-appearance: button;
   overflow: visible;
   box-sizing: inherit;
-  float: right;
   position: relative;
 }
 
@@ -182,7 +181,6 @@ button.sui-button--grey.disabled {
 }
 
 .sliderWrapper-labelledInputWrapper {
-  margin-top: 20px;
   text-align: right;
 }
 .labelledInput {
@@ -332,6 +330,17 @@ button.sui-button--grey.disabled {
 
 .wcb_form-buttonWrapper {
   text-align: right;
+}
+
+li.tileItem {
+  border-left: 0 !important;
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+}
+
+li.brandCheck-checkboxWrapper label {
+    text-align: right;
 }
 
 .chrome input[type="checkbox"]:hover:before, .safari input[type="checkbox"]:hover:before {

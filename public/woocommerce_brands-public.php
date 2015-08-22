@@ -96,7 +96,7 @@ class Woocommerce_Brands_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->Woocommerce_Brands, plugin_dir_url( __FILE__ ) . 'js/woocommerce_brands-public.js', array( 'jquery' ), $this->version, false );
+		// wp_enqueue_script( $this->Woocommerce_Brands, plugin_dir_url( __FILE__ ) . 'js/woocommerce_brands-public.js', array( 'jquery' ), $this->version, false );
 
 	}
 
