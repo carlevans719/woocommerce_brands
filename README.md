@@ -1,4 +1,5 @@
 === Woocommerce Brands ===
+
 Contributors: carlevans719
 Tags: woocommerce, products, taxonomies, custom posts, brands, manufacturers
 Requires at least: 4.2.1
