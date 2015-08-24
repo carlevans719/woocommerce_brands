@@ -1,4 +1,4 @@
-*=== Woocommerce Brands ===*
+=== Woocommerce Brands ===
 Contributors: carlevans719
 Tags: woocommerce, products, taxonomies, custom posts, brands, manufacturers
 Requires at least: 4.2.1
@@ -9,29 +9,29 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Adds Brands and links them to Woocommerce products. Also adds a feature-rich filter to the frontend. 
 
-*== Description ==*
+== Description ==
 
 Please note that this plugin currently in Beta.
 Enables the ability to add "Brands" and assign them to products in Woocommerce. Also enables the filtering of products in the front end by this field.
 
-*== Installation ==*
+== Installation ==
 
 1. Upload `wc_brands.zip` to the `/wp-content/plugins/` directory
 1. Unzip the archive
 1. Rename `woocommerce_brands-master` to `woocommerce-brands`
 1. Activate the plugin through the `Plugins` menu in WordPress
 
-*== Frequently Asked Questions ==*
+== Frequently Asked Questions ==
 
 = Is there support for this plugin =
 
 No, there is no official support for this plugin.
 
-*== Screenshots ==*
+== Screenshots ==
 
 1. Coming soon.
 
-*== Changelog ==*
+== Changelog ==
 
 = 1.0 =
 * Refactored / tidied up the widget file
