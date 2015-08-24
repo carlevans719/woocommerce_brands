@@ -497,6 +497,9 @@ class wcb_FilterWidget extends WP_Widget {
     }
 
 
+
+
+
     /**
      * Takes a directive ($args) and generates/obtains the markup for the segments
      * listed in the directive. Returns the markup.
@@ -600,8 +603,7 @@ if ( !function_exists( 'wcb_get_woocommerce_version' ) ) {
         $plugin_file   = 'woocommerce.php';
         if ( isset( $plugin_folder[ $plugin_file ][ 'Version' ] ) ) {
             return $plugin_folder[ $plugin_file ][ 'Version' ];
-        } //isset($plugin_folder[$plugin_file]['Version'])
-        else {
+        } else {
             return NULL;
         }
     }
@@ -616,19 +618,19 @@ if ( !function_exists( 'wcb_get_html_component' ) ) {
         $componentHTML = '';
         if ( !$componentHTML && $componentName && file_exists( COMPONENTS_DIR . "{$componentName}.php" ) ) {
             $componentHTML = COMPONENTS_DIR . "{$componentName}.php";
-        } //!$componentHTML && $componentName && file_exists(COMPONENTS_DIR . "{$componentName}.php")
+        }
         if ( $componentHTML ) {
             include( $componentHTML );
             return $componentMarkup ? $componentMarkup : false;
-        } //$componentHTML
+        }
     }
 }
 
 
 
 
-// Not currently in use
 
+// Not currently in use
 if ( !function_exists( 'wcb_reOrder' ) ) {
     /**
      * Public function to set the retrieved posts' order
@@ -636,7 +638,7 @@ if ( !function_exists( 'wcb_reOrder' ) ) {
      * @return string
      */
     function wcb_reOrder( $orderBy ) {
-        //TODO: return either 'post_title ASC' or other
+        //TODO: Implement. See #28
         return $orderBy;
     }
 }
@@ -644,8 +646,8 @@ if ( !function_exists( 'wcb_reOrder' ) ) {
 
 
 
-// Not currently in use
 
+// Not currently in use
 if ( !function_exists( 'wcb_adjustLimit' ) ) {
     /**
      * Public function to set the limit on returned posts
@@ -653,7 +655,7 @@ if ( !function_exists( 'wcb_adjustLimit' ) ) {
      * @return integer|NULL
      */
     function wcb_adjustLimit( $limit ) {
-        //TODO: Implement. See #
+        //TODO: Implement. See #29
         return $limit;
     }
 }
@@ -733,6 +735,7 @@ if ( !function_exists( 'wcb_addFilters' ) ) {
 
 
 
+
 if ( !function_exists( 'wcb_get_attributes' ) ) {
     /**
      * Get all possible woocommerce attribute taxonomies
@@ -757,8 +760,14 @@ if ( !function_exists( 'wcb_get_attributes' ) ) {
 
 
 if ( !function_exists( "wcb_sort_queries" ) ) {
+    /**
+     * Pull out and return an array of any filter arguments from a request URI or false
+     *
+     * @return array|boolean
+     */
     function wcb_sort_queries( $getObj ) {
         $arrOut = false;
+
         if ( $getObj && ( isset( $getObj[ 'wcb_filter' ] ) ) ) {
             $strGet = $getObj[ 'wcb_filter' ];
             $arrOut = array();
@@ -768,8 +777,7 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
                 if ( strrpos( $strGet, '[' ) === false ) {
                     $delimeters[ 0 ] = '%5B';
                     $delimeters[ 1 ] = '%5D';
-                } //strrpos( $strGet, '[' ) === false
-                else {
+                } else {
                     $delimeters[ 0 ] = '[';
                     $delimeters[ 1 ] = ']';
                 }
@@ -787,33 +795,30 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
                       $arrVals = explode( ':', $strVals);
                       // $arrVals[0] is the attribute name,
                       // the rest are values
-                      $tmpArr = array();
-                      // TODO: maybe think about a way to put multiple :'s in one [section]
+                      $workingArr = array();
+                      // IDEA: maybe think about a way to put multiple :'s in one [section]
                       // second, are there any _s
                       if ( strrpos( $arrVals[1], '_') > 0) {
-                        $tmpArr[$arrVals[0]] = explode( '_', $arrVals[1] );
+                        $workingArr[$arrVals[0]] = explode( '_', $arrVals[1] );
                       } else {
-                        $tmpArr[$arrVals[0]] = array(
+                        $workingArr[$arrVals[0]] = array(
                           0 => $arrVals[1]
                         );
                       }
-                      $arrVals = $tmpArr;
+                      $arrVals = $workingArr;
 
-                      /*
-                      now we have $arrVals which look like this:
+                      /* now we have $arrVals which look like this:
                       array(
                         pa_speed => array(
                           0 => "1mph",
                           1 => "2mph",
                           [...]
                         )
-                      )
-
-                      */
+                      ) */
                     } else {
                       if ( strrpos( $strVals, '_' ) > 0 ) {
                         $arrVals = explode( '_', $strVals );
-                      } //strrpos($strVals, '_') > 0
+                      }
                     }
                     // Get the type of filter the values apply to (called $filterType)
                     $start = strrpos( $strGet, $delimeters[ 1 ] );
@@ -821,7 +826,7 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
                         $start      = 0;
                         $filterType = $strGet;
                         $strGet     = '';
-                    } //!$start
+                    }
                     $filterType = $filterType ? $filterType : substr( $strGet, $start == 0 ? 0 : $start + 1, strlen( $strGet ) );
                     // Pop the filter type off the GET query
                     $strGet     = $strGet ? substr( $strGet, 0, $start == 0 ? strlen( $strGet ) : $start + 1 ) : $strGet;
@@ -843,20 +848,19 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
                             $arrOut[$filterType][$key] = $value;
                           }
                         }
-                    } //$arrVals
-                    // Otherwise just add the value to the list, under a key called the filter type
-                    else {
+                    } else {
+                        // Otherwise just add the value to the list, under a key called the filter type
                         if ( strrpos( $strVals, '-' ) > 0 ) {
                             $strVals = preg_replace( '/-/', ' ', $strVals );
-                        } //strrpos($strVals, '-') > 0
+                        }
                         $arrOut[ $filterType ] = $strVals;
                     }
-                } //$start && $end && ($start < $end)
+                }
             } while ( strlen( $strGet ) > 0 );
-        } //$getObj && $getObj['wcb_filter']
+        }
         return $arrOut;
     }
-} //!function_exists("wcb_sort_queries")
+}
 
 
 
@@ -867,9 +871,5 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
 
 
 add_action( 'widgets_init', create_function( '', 'return register_widget("wcb_FilterWidget");' ) );
-add_action( 'wp_loaded', 'runWidget' );
+add_action( 'wp_loaded', create_function('', 'global $wcbFilter; $wcbFilter = new wcb_FilterWidget();') );
 add_action( 'pre_get_posts', 'wcb_addFilters' );
-  function runWidget( $taxonomy ) {
-  global $wcbFilter;
-  $wcbFilter = new wcb_FilterWidget();
-}
