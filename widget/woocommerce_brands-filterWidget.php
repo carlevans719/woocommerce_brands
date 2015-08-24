@@ -191,14 +191,8 @@ class wcb_FilterWidget extends WP_Widget {
     private static function get_the_category() {
       $cat = '';
       $valid_categories = $product_categories = array();
-      $args = array(
-        'number'     => $number,
-        'orderby'    => $orderby,
-        'order'      => $order,
-        'hide_empty' => $hide_empty,
-        'include'    => $ids
-      );
-      $product_categories = get_terms( 'product_cat', $args );
+
+      $product_categories = get_terms( 'product_cat' );
       for ($i=0; $i < count($product_categories); $i++) {
         if (!is_wp_error($product_categories)) {
           $valid_categories[] = $product_categories[$i]->term_id;
@@ -728,6 +722,8 @@ if ( !function_exists( 'wcb_addFilters' ) ) {
             if ( count( $toQuery_tax ) )
               set_query_var( 'tax_query', $toQuery_tax );
 
+
+
         }
     }
 }
@@ -871,5 +867,10 @@ if ( !function_exists( "wcb_sort_queries" ) ) {
 
 
 add_action( 'widgets_init', create_function( '', 'return register_widget("wcb_FilterWidget");' ) );
-add_action( 'wp_loaded', create_function('', 'global $wcbFilter; $wcbFilter = new wcb_FilterWidget();') );
+add_action( 'wp_loaded', 'getNewWidget' );
 add_action( 'pre_get_posts', 'wcb_addFilters' );
+
+function getNewWidget() {
+  global $wcbFilter;
+  $wcbFilter = new wcb_FilterWidget();
+}
