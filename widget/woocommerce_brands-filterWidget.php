@@ -34,7 +34,8 @@ class wcb_FilterWidget extends WP_Widget {
         // add_filter( 'post_limits', 'wcb_adjustLimit' );
 
         // run_the_loop() does all the setup for the instance
-        $this->run_the_loop();
+        if (is_taxonomy('product_cat'))
+          $this->run_the_loop();
 
         // Return the instance
         return $this;
@@ -132,7 +133,6 @@ class wcb_FilterWidget extends WP_Widget {
 
       // Set the available brands to those found
       $this->instance_params[ 'availableBrands' ] = $availableBrands;
-
       // Set the available custom attributes to those found
       $this->instance_params[ 'availableAttributes' ] = $availableAttributes;
 
@@ -277,7 +277,6 @@ class wcb_FilterWidget extends WP_Widget {
         foreach ($instance as $key => $value) {
           if (strrpos($key, 'wcb_ca-') !== false) $params['wcb_ca'][] = substr($key, 7, strlen($key));
         };
-
         // Get and echo the component html
         echo self::get_widget_html( $params, $instance );
 
